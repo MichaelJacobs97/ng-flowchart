@@ -10,7 +10,7 @@
     "tslib": "^2.3.0"
   },
   "repository": {
-    "url": "https://github.com/joel-wenzel/ng-flowchart/tree/master/projects/ng-flowchart"
+    "url": "https://github.com/MichaelJacobs97/ng-flowchart/tree/1.0.0-beta/projects/ng-flowchart"
   },
   "ngPackage": {
     "lib": {

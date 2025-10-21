@@ -3,13 +3,13 @@ import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartPadArrowComponent } from '../ng-flowchart-pad-arrow/ng-flowchart-pad-arrow.component';
 import { DropDataService } from '../services/dropdata.service';
-import { NgIf } from '@angular/common';
+
 
 @Component({
   selector: 'ng-flowchart-connector-pad',
   templateUrl: './ng-flowchart-connector-pad.component.html',
   styleUrls: ['./ng-flowchart-connector-pad.component.scss'],
-  imports: [NgIf],
+  imports: [],
 })
 export class NgFlowchartConnectorPadComponent implements AfterViewInit {
   protected element = inject<ElementRef<HTMLElement>>(ElementRef);
