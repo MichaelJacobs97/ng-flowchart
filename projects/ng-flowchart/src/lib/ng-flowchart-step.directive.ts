@@ -1,4 +1,11 @@
-import { AfterViewInit, Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  HostListener,
+  Input,
+  inject,
+} from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { DropDataService } from './services/dropdata.service';
 

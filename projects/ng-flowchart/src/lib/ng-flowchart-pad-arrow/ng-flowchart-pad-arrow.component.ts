@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { OptionsService } from '../services/options.service';
 import { NgStyle } from '@angular/common';
 
@@ -11,8 +19,7 @@ import { NgStyle } from '@angular/common';
 export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
   private options = inject<OptionsService>('OptionsService' as any);
 
-  @ViewChild('arrow')
-  arrow: ElementRef;
+  readonly arrow = viewChild<ElementRef>('arrow');
 
   @Input()
   set position(pos: { start: number[]; end: number[]; root: number[] }) {
@@ -54,7 +61,8 @@ export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
   }
 
   private updatePath() {
-    if (!this.arrow?.nativeElement) {
+    const arrow = this.arrow();
+    if (!arrow?.nativeElement) {
       return;
     }
 
@@ -82,7 +90,7 @@ export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
         end = [this.containerWidth, this.containerHeight];
       }
     }
-    this.arrow.nativeElement.setAttribute(
+    arrow.nativeElement.setAttribute(
       'd',
       `
         M${start[0]} ${start[1]}

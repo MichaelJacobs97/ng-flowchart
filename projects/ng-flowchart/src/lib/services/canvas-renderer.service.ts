@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  ComponentRef,
+  Injectable,
+  ViewContainerRef,
+  inject,
+} from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { CanvasFlow } from '../ng-flowchart-canvas.service';

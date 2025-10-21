@@ -1,9 +1,19 @@
-import { AfterViewInit, Component, ComponentRef, ElementRef, HostListener, Injector, Input, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ComponentRef,
+  ElementRef,
+  HostListener,
+  Injector,
+  Input,
+  ViewContainerRef,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartPadArrowComponent } from '../ng-flowchart-pad-arrow/ng-flowchart-pad-arrow.component';
 import { DropDataService } from '../services/dropdata.service';
-
 
 @Component({
   selector: 'ng-flowchart-connector-pad',
@@ -31,7 +41,7 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     this.setPosition();
   }
 
-  @ViewChild('connectorPad') connectorPad: ElementRef;
+  readonly connectorPad = viewChild<ElementRef>('connectorPad');
 
   padRadius = 5;
   strokeWidth = 2;
@@ -104,7 +114,7 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     const canvasEle = this.canvas.viewContainer.element.nativeElement;
     const canvasBounds: DOMRect = canvasEle.getBoundingClientRect();
 
-    const padBounds = this.connectorPad.nativeElement.getBoundingClientRect();
+    const padBounds = this.connectorPad().nativeElement.getBoundingClientRect();
     var startPos = this.canvas.scaleCoordinate([
       padBounds.left - canvasBounds.left,
       padBounds.top - canvasBounds.top,

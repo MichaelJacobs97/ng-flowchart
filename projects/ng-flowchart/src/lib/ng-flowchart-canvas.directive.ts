@@ -1,4 +1,15 @@
-import { AfterViewInit, Directive, ElementRef, HostBinding, HostListener, Input, OnDestroy, OnInit, ViewContainerRef, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  HostBinding,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewContainerRef,
+  inject,
+} from '@angular/core';
 import { debounceTime, fromEvent, Subscription } from 'rxjs';
 import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';

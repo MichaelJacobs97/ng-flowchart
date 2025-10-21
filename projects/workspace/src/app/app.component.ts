@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, TemplateRef, ViewChild, ChangeDetectionStrategy, VERSION, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  TemplateRef,
+  ChangeDetectionStrategy,
+  VERSION,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src';
@@ -33,8 +41,7 @@ export class AppComponent implements AfterViewInit {
     manualConnectors: true,
   };
 
-  @ViewChild('normalStep')
-  normalStepTemplate: TemplateRef<any>;
+  readonly normalStepTemplate = viewChild<TemplateRef<any>>('normalStep');
 
   sampleJson =
     '{"root":{"id":"s1674421266194","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[{"id":"s1674421267975","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[{"id":"s1674421269738","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]}]},{"id":"s1674421268826","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]}]},"connectors":[{"startStepId":"s1674421269738","endStepId":"s1674421268826"}]}';
@@ -85,8 +92,7 @@ export class AppComponent implements AfterViewInit {
     },
   ];
 
-  @ViewChild(NgFlowchartCanvasDirective)
-  canvas: NgFlowchartCanvasDirective;
+  readonly canvas = viewChild(NgFlowchartCanvasDirective);
 
   disabled = false;
 
@@ -102,7 +108,7 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     // this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
-    this.stepRegistry.registerStep('log', this.normalStepTemplate);
+    this.stepRegistry.registerStep('log', this.normalStepTemplate());
     this.stepRegistry.registerStep('router', CustomStepComponent);
     this.stepRegistry.registerStep('nested-flow', NestedFlowComponent);
     this.stepRegistry.registerStep('form-step', FormStepComponent);
@@ -136,20 +142,20 @@ export class AppComponent implements AfterViewInit {
 
   afterScale(scale: number): void {
     //realistically you want to recursively get all steps in canvas
-    const firstSetOfChildren = this.canvas.getFlow().getRoot().children;
+    const firstSetOfChildren = this.canvas().getFlow().getRoot().children;
     firstSetOfChildren.forEach(step => {
       if (step instanceof NestedFlowComponent) {
-        step.nestedCanvas.setNestedScale(scale);
+        step.nestedCanvas().setNestedScale(scale);
       }
     });
   }
 
   showUpload() {
-    this.canvas.getFlow().upload(this.sampleJson);
+    this.canvas().getFlow().upload(this.sampleJson);
   }
 
   showFlowData() {
-    let json = this.canvas.getFlow().toJSON(4);
+    let json = this.canvas().getFlow().toJSON(4);
 
     var x = window.open();
     x.document.open();
@@ -162,39 +168,39 @@ export class AppComponent implements AfterViewInit {
   }
 
   clearData() {
-    this.canvas.getFlow().clear();
+    this.canvas().getFlow().clear();
   }
 
   onGapChanged(event) {
     this.options = {
-      ...this.canvas.options,
+      ...this.canvas().options,
       stepGap: parseInt(event.target.value),
     };
   }
 
   onSequentialChange(event) {
     this.options = {
-      ...this.canvas.options,
+      ...this.canvas().options,
       isSequential: event.target.checked,
     };
   }
 
   onOrientationChange(event) {
-    this.canvas.setOrientation(
+    this.canvas().setOrientation(
       event.target.checked ? 'HORIZONTAL' : 'VERTICAL'
     );
   }
 
   onDelete(id) {
-    this.canvas.getFlow().getStep(id).destroy(true);
+    this.canvas().getFlow().getStep(id).destroy(true);
   }
   onGrow() {
-    this.canvas.scaleUp();
+    this.canvas().scaleUp();
   }
   onShrink() {
-    this.canvas.scaleDown();
+    this.canvas().scaleDown();
   }
   onReset() {
-    this.canvas.setScale(1);
+    this.canvas().setScale(1);
   }
 }

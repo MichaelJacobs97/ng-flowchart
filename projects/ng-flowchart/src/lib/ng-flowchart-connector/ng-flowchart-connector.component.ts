@@ -5,8 +5,8 @@ import {
   ElementRef,
   HostListener,
   Input,
-  ViewChild,
   inject,
+  viewChild,
 } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
@@ -33,10 +33,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     return this._connector;
   }
 
-  @ViewChild('arrow')
-  arrow: ElementRef;
-  @ViewChild('arrowPadding')
-  arrowPadding: ElementRef;
+  readonly arrow = viewChild<ElementRef>('arrow');
+  readonly arrowPadding = viewChild<ElementRef>('arrowPadding');
 
   @Input()
   set autoPosition(pos: { start: number[]; end: number[] }) {
@@ -52,8 +50,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   selected = false;
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent) {
-    const path = this.arrow.nativeElement as SVGPathElement;
-    if (event.target === this.arrowPadding.nativeElement && !this.selected) {
+    const path = this.arrow().nativeElement as SVGPathElement;
+    if (event.target === this.arrowPadding().nativeElement && !this.selected) {
       path.parentElement.setAttribute(
         'marker-end',
         'url(#connectorArrowheadSelected)'
@@ -73,12 +71,12 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
 
   @HostListener('document:mousedown', ['$event'])
   onDocumentClick(event: MouseEvent) {
-    const path = this.arrow.nativeElement as SVGPathElement;
+    const path = this.arrow().nativeElement as SVGPathElement;
     const insideMenuClicked = (event.target as HTMLElement).matches(
       '.ngflowchart-connector-menu *'
     );
     if (
-      event.target !== this.arrowPadding.nativeElement &&
+      event.target !== this.arrowPadding().nativeElement &&
       !insideMenuClicked
     ) {
       path.parentElement.setAttribute('marker-end', 'url(#connectorArrowhead)');
@@ -88,8 +86,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
 
   @HostListener('mouseover', ['$event.target'])
   onMouseOver(target: any) {
-    if (!this.selected && target === this.arrowPadding.nativeElement) {
-      const path = this.arrow.nativeElement as SVGPathElement;
+    if (!this.selected && target === this.arrowPadding().nativeElement) {
+      const path = this.arrow().nativeElement as SVGPathElement;
       path.parentElement.setAttribute(
         'marker-end',
         'url(#connectorArrowheadHover)'
@@ -98,8 +96,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   }
   @HostListener('mouseout', ['$event.target'])
   onMouseOut(target: any) {
-    if (!this.selected && target === this.arrowPadding.nativeElement) {
-      const path = this.arrow.nativeElement as SVGPathElement;
+    if (!this.selected && target === this.arrowPadding().nativeElement) {
+      const path = this.arrow().nativeElement as SVGPathElement;
       path.parentElement.setAttribute('marker-end', 'url(#connectorArrowhead)');
     }
   }
@@ -148,7 +146,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   }
 
   private updatePath() {
-    if (!this.arrow?.nativeElement) {
+    const arrowValue = this.arrow();
+    if (!arrowValue?.nativeElement) {
       return;
     }
     const pos = this._position;
@@ -183,7 +182,7 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
       M${start[0]} ${start[1]}
       L${end[0]} ${end[1]}
     `;
-    this.arrow.nativeElement.setAttribute('d', arrow);
-    this.arrowPadding.nativeElement.setAttribute('d', arrow);
+    arrowValue.nativeElement.setAttribute('d', arrow);
+    this.arrowPadding().nativeElement.setAttribute('d', arrow);
   }
 }

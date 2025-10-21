@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { OptionsService } from '../services/options.service';
 import { NgStyle } from '@angular/common';
 
@@ -11,8 +19,7 @@ import { NgStyle } from '@angular/common';
 export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
   private options = inject<OptionsService>('OptionsService' as any);
 
-  @ViewChild('arrow')
-  arrow: ElementRef;
+  readonly arrow = viewChild<ElementRef>('arrow');
 
   @Input()
   set position(pos: { start: number[]; end: number[] }) {
@@ -69,13 +76,14 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
   }
 
   private updatePath() {
-    if (!this.arrow?.nativeElement) {
+    const arrow = this.arrow();
+    if (!arrow?.nativeElement) {
       return;
     }
 
     if (this.options.options.orientation === 'VERTICAL') {
       if (this.isLeftFlowing) {
-        this.arrow.nativeElement.setAttribute(
+        arrow.nativeElement.setAttribute(
           'd',
           `
         M${this.containerWidth - this.padding} 0 
@@ -85,7 +93,7 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
       `
         );
       } else {
-        this.arrow.nativeElement.setAttribute(
+        arrow.nativeElement.setAttribute(
           'd',
           `
         M${this.padding} 0 
@@ -97,7 +105,7 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
       }
     } else if (this.options.options.orientation === 'HORIZONTAL') {
       if (this.isLeftFlowing) {
-        this.arrow.nativeElement.setAttribute(
+        arrow.nativeElement.setAttribute(
           'd',
           `
         M0 ${this.padding}
@@ -107,7 +115,7 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
       `
         );
       } else {
-        this.arrow.nativeElement.setAttribute(
+        arrow.nativeElement.setAttribute(
           'd',
           `
         M0 ${this.containerHeight - this.padding}

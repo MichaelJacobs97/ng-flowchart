@@ -3,16 +3,15 @@ import {
   Component,
   ComponentRef,
   ElementRef,
-  EventEmitter,
   HostListener,
   Injector,
   Input,
   OnInit,
-  Output,
   TemplateRef,
-  ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
+  output,
+  viewChild,
 } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
@@ -98,8 +97,7 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   //could potentially try to make this abstract
-  @ViewChild('canvasContent')
-  protected view: ElementRef;
+  protected readonly view = viewChild<ElementRef>('canvasContent');
 
   @Input()
   data: T;
@@ -113,8 +111,7 @@ export class NgFlowchartStepComponent<T = any>
   @Input()
   compRef: ComponentRef<NgFlowchartStepComponent>;
 
-  @Output()
-  viewInit = new EventEmitter();
+  readonly viewInit = output();
 
   @Input()
   contentTemplate: TemplateRef<any>;
@@ -447,7 +444,7 @@ export class NgFlowchartStepComponent<T = any>
 
   /** The native HTMLElement of this step */
   get nativeElement(): HTMLElement {
-    return this.view?.nativeElement;
+    return this.view()?.nativeElement;
   }
 
   setId(id) {
@@ -455,7 +452,7 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   zsetPosition(pos: number[], offsetCenter: boolean = false) {
-    if (!this.view) {
+    if (!this.view()) {
       console.warn('Trying to set position before view init');
       //save pos and set in after view init
       this._initPosition = [...pos];

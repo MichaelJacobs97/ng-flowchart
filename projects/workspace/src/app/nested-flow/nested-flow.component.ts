@@ -4,7 +4,7 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import {
   NgFlowchart,
@@ -27,11 +27,9 @@ export class NestedFlowComponent
   extends NgFlowchartStepComponent
   implements OnInit, OnDestroy, AfterViewInit
 {
-  @ViewChild(NgFlowchartCanvasDirective)
-  nestedCanvas: NgFlowchartCanvasDirective;
+  readonly nestedCanvas = viewChild(NgFlowchartCanvasDirective);
 
-  @ViewChild('canvasContent')
-  stepContent: ElementRef<HTMLElement>;
+  readonly stepContent = viewChild<ElementRef<HTMLElement>>('canvasContent');
 
   callbacks: NgFlowchart.Callbacks = {
     afterRender: () => {
@@ -78,7 +76,7 @@ export class NestedFlowComponent
   }
 
   shouldEvalDropHover(coords: number[], stepToDrop: NgFlowchart.Step): boolean {
-    const canvasRect = this.stepContent.nativeElement.getBoundingClientRect();
+    const canvasRect = this.stepContent().nativeElement.getBoundingClientRect();
     return !this.areCoordsInRect(coords, canvasRect);
   }
 
@@ -88,7 +86,7 @@ export class NestedFlowComponent
       ...json,
       data: {
         ...this.data,
-        nested: this.nestedCanvas.getFlow().toObject(),
+        nested: this.nestedCanvas().getFlow().toObject(),
       },
     };
   }
@@ -102,10 +100,11 @@ export class NestedFlowComponent
   }
 
   async onUpload(data: NestedData) {
-    if (!this.nestedCanvas) {
+    const nestedCanvas = this.nestedCanvas();
+    if (!nestedCanvas) {
       return;
     }
-    await this.nestedCanvas.getFlow().upload(data.nested);
+    await nestedCanvas.getFlow().upload(data.nested);
   }
 
   private areCoordsInRect(coords: number[], rect: Partial<DOMRect>): boolean {

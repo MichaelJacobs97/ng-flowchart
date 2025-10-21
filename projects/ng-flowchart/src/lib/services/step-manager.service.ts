@@ -1,4 +1,11 @@
-import { ComponentRef, Injectable, TemplateRef, Type, ViewContainerRef, inject } from '@angular/core';
+import {
+  ComponentRef,
+  Injectable,
+  TemplateRef,
+  Type,
+  ViewContainerRef,
+  inject,
+} from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartStepRegistry } from '../ng-flowchart-step-registry.service';
