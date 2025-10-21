@@ -8,8 +8,8 @@ describe('NgFlowchartStepComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [NgFlowchartStepComponent],
-    }).compileComponents();
+    imports: [NgFlowchartStepComponent],
+}).compileComponents();
   });
 
   beforeEach(() => {

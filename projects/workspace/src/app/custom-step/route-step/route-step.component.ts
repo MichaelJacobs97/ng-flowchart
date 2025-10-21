@@ -5,8 +5,7 @@ import { NgFlowchart } from 'projects/ng-flowchart/src';
 @Component({
     selector: 'app-route-step',
     templateUrl: './route-step.component.html',
-    styleUrls: ['./route-step.component.scss'],
-    standalone: false
+    styleUrls: ['./route-step.component.scss']
 })
 export class RouteStepComponent
   extends NgFlowchartStepComponent

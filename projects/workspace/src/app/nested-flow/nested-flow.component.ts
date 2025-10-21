@@ -11,6 +11,7 @@ import {
   NgFlowchartCanvasDirective,
   NgFlowchartStepComponent,
 } from 'projects/ng-flowchart/src';
+import { NgFlowchartCanvasDirective as NgFlowchartCanvasDirective_1 } from '../../../../ng-flowchart/src/lib/ng-flowchart-canvas.directive';
 
 export type NestedData = {
   nested: any;
@@ -20,7 +21,7 @@ export type NestedData = {
     selector: 'app-nested-flow',
     templateUrl: './nested-flow.component.html',
     styleUrls: ['./nested-flow.component.scss'],
-    standalone: false
+    imports: [NgFlowchartCanvasDirective_1]
 })
 export class NestedFlowComponent
   extends NgFlowchartStepComponent

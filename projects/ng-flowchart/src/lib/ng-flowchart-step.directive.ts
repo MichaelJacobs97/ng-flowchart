@@ -8,10 +8,7 @@ import {
 import { NgFlowchart } from './model/flow.model';
 import { DropDataService } from './services/dropdata.service';
 
-@Directive({
-    selector: '[ngFlowchartStep]',
-    standalone: false
-})
+@Directive({ selector: '[ngFlowchartStep]' })
 export class NgFlowchartStepDirective implements AfterViewInit {
   @HostListener('dragstart', ['$event'])
   onDragStart(event: DragEvent) {

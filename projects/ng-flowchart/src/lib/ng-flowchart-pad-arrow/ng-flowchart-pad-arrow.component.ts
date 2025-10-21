@@ -8,12 +8,13 @@ import {
   ViewChild,
 } from '@angular/core';
 import { OptionsService } from '../services/options.service';
+import { NgStyle } from '@angular/common';
 
 @Component({
     selector: 'ng-flowchart-pad-arrow',
     templateUrl: './ng-flowchart-pad-arrow.component.html',
     styleUrls: ['./ng-flowchart-pad-arrow.component.scss'],
-    standalone: false
+    imports: [NgStyle]
 })
 export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
   @ViewChild('arrow')

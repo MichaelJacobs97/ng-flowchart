@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgFlowchartStepComponent } from 'projects/ng-flowchart/src/lib/ng-flowchart-step/ng-flowchart-step.component';
+import { FormsModule } from '@angular/forms';
 
 export type MyForm = {
   input1: string;
@@ -9,7 +10,7 @@ export type MyForm = {
     selector: 'app-form-step',
     templateUrl: './form-step.component.html',
     styleUrls: ['./form-step.component.scss'],
-    standalone: false
+    imports: [FormsModule]
 })
 export class FormStepComponent
   extends NgFlowchartStepComponent<MyForm>

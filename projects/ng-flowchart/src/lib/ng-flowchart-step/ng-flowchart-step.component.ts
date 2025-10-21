@@ -20,6 +20,7 @@ import { NgFlowchartArrowComponent } from '../ng-flowchart-arrow/ng-flowchart-ar
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartConnectorPadComponent } from '../ng-flowchart-connector-pad/ng-flowchart-connector-pad.component';
 import { DropDataService } from '../services/dropdata.service';
+import { NgTemplateOutlet } from '@angular/common';
 
 export type AddChildOptions = {
   /** Should the child be added as a sibling to existing children, if false the existing children will be reparented to this new child.
@@ -37,7 +38,7 @@ export type AddChildOptions = {
     templateUrl: './ng-flowchart-step.component.html',
     styleUrls: ['./ng-flowchart-step.component.scss'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [NgTemplateOutlet]
 })
 export class NgFlowchartStepComponent<T = any>
   implements OnInit, AfterViewInit

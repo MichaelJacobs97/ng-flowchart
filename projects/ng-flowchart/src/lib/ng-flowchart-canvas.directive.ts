@@ -24,8 +24,7 @@ import { StepManagerService } from './services/step-manager.service';
         StepManagerService,
         OptionsService,
         CanvasRendererService,
-    ],
-    standalone: false
+    ]
 })
 export class NgFlowchartCanvasDirective
   implements OnInit, OnDestroy, AfterViewInit
