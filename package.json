@@ -1,6 +1,6 @@
 {
-  "name": "ng-flowchart",
-  "version": "0.0.1",
+  "name": "ng-flowchart-mja",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -54,5 +54,17 @@
     "protractor": "~7.0.0",
     "ts-node": "~10.9.2",
     "typescript": "~5.9.3"
-  }
+  },
+  "description": "ng-flowchart for Angular 20",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichaelJacobs97/ng-flowchart.git"
+  },
+  "author": "michikowski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MichaelJacobs97/ng-flowchart/issues"
+  },
+  "homepage": "https://github.com/MichaelJacobs97/ng-flowchart#readme"
 }
