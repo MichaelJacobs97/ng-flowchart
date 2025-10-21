@@ -16,10 +16,10 @@ import { DropDataService } from '../services/dropdata.service';
 import { NgIf } from '@angular/common';
 
 @Component({
-    selector: 'ng-flowchart-connector-pad',
-    templateUrl: './ng-flowchart-connector-pad.component.html',
-    styleUrls: ['./ng-flowchart-connector-pad.component.scss'],
-    imports: [NgIf]
+  selector: 'ng-flowchart-connector-pad',
+  templateUrl: './ng-flowchart-connector-pad.component.html',
+  styleUrls: ['./ng-flowchart-connector-pad.component.scss'],
+  imports: [NgIf],
 })
 export class NgFlowchartConnectorPadComponent implements AfterViewInit {
   @Input()

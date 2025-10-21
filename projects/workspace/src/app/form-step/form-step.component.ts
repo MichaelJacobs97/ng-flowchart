@@ -7,10 +7,10 @@ export type MyForm = {
 };
 
 @Component({
-    selector: 'app-form-step',
-    templateUrl: './form-step.component.html',
-    styleUrls: ['./form-step.component.scss'],
-    imports: [FormsModule]
+  selector: 'app-form-step',
+  templateUrl: './form-step.component.html',
+  styleUrls: ['./form-step.component.scss'],
+  imports: [FormsModule],
 })
 export class FormStepComponent
   extends NgFlowchartStepComponent<MyForm>

@@ -18,10 +18,10 @@ export type NestedData = {
 };
 
 @Component({
-    selector: 'app-nested-flow',
-    templateUrl: './nested-flow.component.html',
-    styleUrls: ['./nested-flow.component.scss'],
-    imports: [NgFlowchartCanvasDirective_1]
+  selector: 'app-nested-flow',
+  templateUrl: './nested-flow.component.html',
+  styleUrls: ['./nested-flow.component.scss'],
+  imports: [NgFlowchartCanvasDirective_1],
 })
 export class NestedFlowComponent
   extends NgFlowchartStepComponent

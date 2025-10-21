@@ -15,11 +15,11 @@ import { FormStepComponent } from './form-step/form-step.component';
 import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class AppComponent implements AfterViewInit {
   title = 'workspace';

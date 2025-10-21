@@ -12,10 +12,10 @@ import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgIf, NgStyle, NgClass } from '@angular/common';
 
 @Component({
-    selector: 'ng-flowchart-connector',
-    templateUrl: './ng-flowchart-connector.component.html',
-    styleUrls: ['./ng-flowchart-connector.component.scss'],
-    imports: [NgIf, NgStyle, NgClass]
+  selector: 'ng-flowchart-connector',
+  templateUrl: './ng-flowchart-connector.component.html',
+  styleUrls: ['./ng-flowchart-connector.component.scss'],
+  imports: [NgIf, NgStyle, NgClass],
 })
 export class NgFlowchartConnectorComponent implements AfterViewInit {
   @Input() canvas: NgFlowchartCanvasService;

@@ -8,8 +8,8 @@ describe('NgFlowchartConnectorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [NgFlowchartConnectorComponent],
-}).compileComponents();
+      imports: [NgFlowchartConnectorComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NgFlowchartConnectorComponent);
     component = fixture.componentInstance;

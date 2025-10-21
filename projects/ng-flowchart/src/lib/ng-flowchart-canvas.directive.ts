@@ -18,13 +18,13 @@ import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
 
 @Directive({
-    selector: '[ngFlowchartCanvas]',
-    providers: [
-        NgFlowchartCanvasService,
-        StepManagerService,
-        OptionsService,
-        CanvasRendererService,
-    ]
+  selector: '[ngFlowchartCanvas]',
+  providers: [
+    NgFlowchartCanvasService,
+    StepManagerService,
+    OptionsService,
+    CanvasRendererService,
+  ],
 })
 export class NgFlowchartCanvasDirective
   implements OnInit, OnDestroy, AfterViewInit
@@ -35,7 +35,9 @@ export class NgFlowchartCanvasDirective
       return;
     }
     // its possible multiple canvases exist so make sure we only move/drop on the closest one
-    const closestCanvasToTarget = (event.target as HTMLElement).closest(`.${CONSTANTS.CANVAS_CLASS}`);
+    const closestCanvasToTarget = (event.target as HTMLElement).closest(
+      `.${CONSTANTS.CANVAS_CLASS}`
+    );
     if (closestCanvasToTarget !== this.canvasEle.nativeElement) {
       return;
     }

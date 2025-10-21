@@ -11,10 +11,10 @@ import { OptionsService } from '../services/options.service';
 import { NgStyle } from '@angular/common';
 
 @Component({
-    selector: 'ng-flowchart-arrow',
-    templateUrl: './ng-flowchart-arrow.component.html',
-    styleUrls: ['./ng-flowchart-arrow.component.scss'],
-    imports: [NgStyle]
+  selector: 'ng-flowchart-arrow',
+  templateUrl: './ng-flowchart-arrow.component.html',
+  styleUrls: ['./ng-flowchart-arrow.component.scss'],
+  imports: [NgStyle],
 })
 export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
   @ViewChild('arrow')
