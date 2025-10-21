@@ -10,6 +10,7 @@
     "prettier": "npx prettier --write .",
     "e2e": "ng e2e"
   },
+  "private": false,
   "dependencies": {
     "@angular/animations": "^20.3.6",
     "@angular/common": "^20.3.6",
