@@ -58,17 +58,13 @@
               "base": "dist/workspace"
             },
             "index": "projects/workspace/src/index.html",
-            "polyfills": [
-              "projects/workspace/src/polyfills.ts"
-            ],
+            "polyfills": ["projects/workspace/src/polyfills.ts"],
             "tsConfig": "projects/workspace/tsconfig.app.json",
             "assets": [
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": [
-              "projects/workspace/src/styles.scss"
-            ],
+            "styles": ["projects/workspace/src/styles.scss"],
             "scripts": [],
             "extractLicenses": false,
             "sourceMap": true,
@@ -133,9 +129,7 @@
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": [
-              "projects/workspace/src/styles.scss"
-            ],
+            "styles": ["projects/workspace/src/styles.scss"],
             "scripts": []
           }
         },

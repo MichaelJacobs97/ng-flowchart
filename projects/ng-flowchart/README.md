@@ -24,12 +24,11 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
 - 1.0.0-beta.30
   - Angular 17 & 18 support
-    - Requires use of ```{ provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false }```
+    - Requires use of `{ provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false }`
       OR
-      ```@import '@joelwenzel/ng-flowchart/assets/styles.scss';```
+      `@import '@joelwenzel/ng-flowchart/assets/styles.scss';`
 
 - 1.0.2-beta
-
   - Support for canvas zoom/scale via mouse scroll or manual
 
 - 1.0.0-beta
@@ -329,7 +328,6 @@ Options are passed via the **ngFlowchartOptions** input on the **ngFlowchartCanv
 - #### **rootPosition**
 
   Set the default root position of the chart.
-
   - TOP_CENTER - Centered on the X and near the top of the Y axis
   - CENTER - Centered on both the x and y axis
   - FREE - Leave the root node wherever dropped

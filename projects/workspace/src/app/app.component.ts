@@ -20,7 +20,6 @@ import { NestedFlowComponent } from './nested-flow/nested-flow.component';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
 })
 export class AppComponent implements AfterViewInit {
   private stepRegistry = inject(NgFlowchartStepRegistry);

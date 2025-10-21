@@ -1,8 +1,6 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-  "assets": [
-    "./assets/**/*"
-  ],
+  "assets": ["./assets/**/*"],
   "dest": "../../dist/ng-flowchart",
   "lib": {
     "entryFile": "src/index.ts"

@@ -225,13 +225,10 @@ export class NgFlowchartCanvasService {
     componentRef = this.stepmanager.create(pending, this);
 
     return new Promise(resolve => {
-      let sub = componentRef.instance.viewInit.subscribe(
-        () => {
-          sub.unsubscribe();
-          resolve(componentRef);
-        },
-        error => console.error(error)
-      );
+      let sub = componentRef.instance.viewInit.subscribe(() => {
+        sub.unsubscribe();
+        resolve(componentRef);
+      });
     });
   }
 
