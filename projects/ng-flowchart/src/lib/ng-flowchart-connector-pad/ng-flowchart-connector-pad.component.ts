@@ -1,14 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ComponentRef,
-  ElementRef,
-  HostListener,
-  Injector,
-  Input,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { AfterViewInit, Component, ComponentRef, ElementRef, HostListener, Injector, Input, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartPadArrowComponent } from '../ng-flowchart-pad-arrow/ng-flowchart-pad-arrow.component';
@@ -22,6 +12,10 @@ import { NgIf } from '@angular/common';
   imports: [NgIf],
 })
 export class NgFlowchartConnectorPadComponent implements AfterViewInit {
+  protected element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private viewContainer = inject(ViewContainerRef);
+  private data = inject(DropDataService);
+
   @Input()
   canvas: NgFlowchartCanvasService;
   @Input()
@@ -64,11 +58,7 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
 
   private arrow: ComponentRef<NgFlowchartPadArrowComponent>;
 
-  constructor(
-    protected element: ElementRef<HTMLElement>,
-    private viewContainer: ViewContainerRef,
-    private data: DropDataService
-  ) {
+  constructor() {
     this.dragMove = this.dragMove.bind(this);
     this.dragEnd = this.dragEnd.bind(this);
   }

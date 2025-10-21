@@ -1,15 +1,12 @@
-import {
-  AfterViewInit,
-  Directive,
-  ElementRef,
-  HostListener,
-  Input,
-} from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { DropDataService } from './services/dropdata.service';
 
 @Directive({ selector: '[ngFlowchartStep]' })
 export class NgFlowchartStepDirective implements AfterViewInit {
+  protected element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private data = inject(DropDataService);
+
   @HostListener('dragstart', ['$event'])
   onDragStart(event: DragEvent) {
     this.data.setDragStep(this.flowStep);
@@ -25,10 +22,7 @@ export class NgFlowchartStepDirective implements AfterViewInit {
   @Input('ngFlowchartStep')
   flowStep: NgFlowchart.PendingStep;
 
-  constructor(
-    protected element: ElementRef<HTMLElement>,
-    private data: DropDataService
-  ) {
+  constructor() {
     this.element.nativeElement.setAttribute('draggable', 'true');
   }
 

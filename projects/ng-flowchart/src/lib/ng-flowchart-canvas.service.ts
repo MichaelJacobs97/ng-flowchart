@@ -1,9 +1,4 @@
-import {
-  ChangeDetectorRef,
-  ComponentRef,
-  Injectable,
-  ViewContainerRef,
-} from '@angular/core';
+import { ChangeDetectorRef, ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { NgFlowchartConnectorComponent } from './ng-flowchart-connector/ng-flowchart-connector.component';
 import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.component';
@@ -67,6 +62,12 @@ export class CanvasFlow {
 
 @Injectable()
 export class NgFlowchartCanvasService {
+  private drag = inject(DragService);
+  options = inject(OptionsService);
+  private renderer = inject(CanvasRendererService);
+  private stepmanager = inject(StepManagerService);
+  private cdr = inject(ChangeDetectorRef);
+
   viewContainer: ViewContainerRef;
   isDragging: boolean = false;
 
@@ -84,14 +85,6 @@ export class NgFlowchartCanvasService {
     code: 'NO_PARENT',
     message: 'Step was not dropped under a parent and is not the root node',
   };
-
-  constructor(
-    private drag: DragService,
-    public options: OptionsService,
-    private renderer: CanvasRendererService,
-    private stepmanager: StepManagerService,
-    private cdr: ChangeDetectorRef
-  ) {}
 
   public init(view: ViewContainerRef) {
     this.viewContainer = view;

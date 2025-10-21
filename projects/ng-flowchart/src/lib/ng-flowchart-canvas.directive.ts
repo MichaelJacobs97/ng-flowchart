@@ -1,14 +1,4 @@
-import {
-  AfterViewInit,
-  Directive,
-  ElementRef,
-  HostBinding,
-  HostListener,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewContainerRef,
-} from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostBinding, HostListener, Input, OnDestroy, OnInit, ViewContainerRef, inject } from '@angular/core';
 import { debounceTime, fromEvent, Subscription } from 'rxjs';
 import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
@@ -29,6 +19,11 @@ import { StepManagerService } from './services/step-manager.service';
 export class NgFlowchartCanvasDirective
   implements OnInit, OnDestroy, AfterViewInit
 {
+  protected canvasEle = inject<ElementRef<HTMLElement>>(ElementRef);
+  private viewContainer = inject(ViewContainerRef);
+  private canvas = inject(NgFlowchartCanvasService);
+  private optionService = inject(OptionsService);
+
   @HostListener('drop', ['$event'])
   protected onDrop(event: DragEvent) {
     if (this._disabled) {
@@ -149,12 +144,7 @@ export class NgFlowchartCanvasDirective
   private canvasContent: HTMLElement;
   private windowResizeSubscription: Subscription;
 
-  constructor(
-    protected canvasEle: ElementRef<HTMLElement>,
-    private viewContainer: ViewContainerRef,
-    private canvas: NgFlowchartCanvasService,
-    private optionService: OptionsService
-  ) {
+  constructor() {
     this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
     this.canvasContent = this.createCanvasContent(this.viewContainer);
     this._id = this.canvasContent.id;

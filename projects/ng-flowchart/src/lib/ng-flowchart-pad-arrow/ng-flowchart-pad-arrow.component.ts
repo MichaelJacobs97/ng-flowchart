@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Inject,
-  Input,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { OptionsService } from '../services/options.service';
 import { NgStyle } from '@angular/common';
 
@@ -17,6 +9,8 @@ import { NgStyle } from '@angular/common';
   imports: [NgStyle],
 })
 export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
+  private options = inject<OptionsService>('OptionsService' as any);
+
   @ViewChild('arrow')
   arrow: ElementRef;
 
@@ -44,8 +38,6 @@ export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
   containerLeft: number = 0;
   containerTop: number = 0;
   _position: { start: number[]; end: number[] };
-
-  constructor(@Inject('OptionsService') private options: OptionsService) {}
 
   ngOnInit(): void {}
 

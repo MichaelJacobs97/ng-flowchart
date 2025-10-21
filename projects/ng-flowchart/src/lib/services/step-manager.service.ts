@@ -1,10 +1,4 @@
-import {
-  ComponentRef,
-  Injectable,
-  TemplateRef,
-  Type,
-  ViewContainerRef,
-} from '@angular/core';
+import { ComponentRef, Injectable, TemplateRef, Type, ViewContainerRef, inject } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartStepRegistry } from '../ng-flowchart-step-registry.service';
@@ -16,9 +10,9 @@ import { DropDataService } from './dropdata.service';
  */
 @Injectable()
 export class StepManagerService {
-  private viewContainer: ViewContainerRef;
+  private registry = inject(NgFlowchartStepRegistry);
 
-  constructor(private registry: NgFlowchartStepRegistry) {}
+  private viewContainer: ViewContainerRef;
 
   public init(viewContainer: ViewContainerRef) {
     this.viewContainer = viewContainer;

@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ComponentRef,
-  ElementRef,
-  HostListener,
-  Input,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ComponentRef, ElementRef, HostListener, Input, ViewChild, inject } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgIf, NgStyle, NgClass } from '@angular/common';
@@ -18,6 +10,8 @@ import { NgIf, NgStyle, NgClass } from '@angular/common';
   imports: [NgIf, NgStyle, NgClass],
 })
 export class NgFlowchartConnectorComponent implements AfterViewInit {
+  protected element = inject<ElementRef<HTMLElement>>(ElementRef);
+
   @Input() canvas: NgFlowchartCanvasService;
   @Input()
   compRef: ComponentRef<NgFlowchartConnectorComponent>;
@@ -112,7 +106,6 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   get xOffset(): number {
     return this.canvas.options.options.orientation === 'HORIZONTAL' ? 6 : 0;
   }
-  constructor(protected element: ElementRef<HTMLElement>) {}
 
   ngAfterViewInit(): void {
     this.updatePath();

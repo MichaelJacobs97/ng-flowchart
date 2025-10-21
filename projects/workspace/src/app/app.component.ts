@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  TemplateRef,
-  ViewChild,
-  ChangeDetectionStrategy,
-  VERSION,
-} from '@angular/core';
+import { AfterViewInit, Component, TemplateRef, ViewChild, ChangeDetectionStrategy, VERSION, inject } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src';
@@ -22,6 +15,8 @@ import { NestedFlowComponent } from './nested-flow/nested-flow.component';
   standalone: false,
 })
 export class AppComponent implements AfterViewInit {
+  private stepRegistry = inject(NgFlowchartStepRegistry);
+
   title = 'workspace';
   version = VERSION;
 
@@ -95,7 +90,7 @@ export class AppComponent implements AfterViewInit {
 
   disabled = false;
 
-  constructor(private stepRegistry: NgFlowchartStepRegistry) {
+  constructor() {
     this.callbacks.onDropError = this.onDropError;
     this.callbacks.onMoveError = this.onMoveError;
     this.callbacks.afterDeleteStep = this.afterDeleteStep;

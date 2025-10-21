@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Inject,
-  Input,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { OptionsService } from '../services/options.service';
 import { NgStyle } from '@angular/common';
 
@@ -17,6 +9,8 @@ import { NgStyle } from '@angular/common';
   imports: [NgStyle],
 })
 export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
+  private options = inject<OptionsService>('OptionsService' as any);
+
   @ViewChild('arrow')
   arrow: ElementRef;
 
@@ -59,8 +53,6 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
   //to be applied on left and right edges
   private padding = 10;
   private isLeftFlowing = false;
-
-  constructor(@Inject('OptionsService') private options: OptionsService) {}
 
   ngOnInit(): void {}
 
