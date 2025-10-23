@@ -58,13 +58,17 @@
               "base": "dist/workspace"
             },
             "index": "projects/workspace/src/index.html",
-            "polyfills": ["projects/workspace/src/polyfills.ts"],
+            "polyfills": [
+              "projects/workspace/src/polyfills.ts"
+            ],
             "tsConfig": "projects/workspace/tsconfig.app.json",
             "assets": [
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": ["projects/workspace/src/styles.scss"],
+            "styles": [
+              "projects/workspace/src/styles.scss"
+            ],
             "scripts": [],
             "extractLicenses": false,
             "sourceMap": true,
@@ -129,7 +133,9 @@
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": ["projects/workspace/src/styles.scss"],
+            "styles": [
+              "projects/workspace/src/styles.scss"
+            ],
             "scripts": []
           }
         },
@@ -151,6 +157,84 @@
             "lintFilePatterns": [
               "projects/workspace/**/*.ts",
               "projects/workspace/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "@michikowski/ng-flowchart": {
+      "projectType": "library",
+      "root": "projects/michikowski/ng-flowchart",
+      "sourceRoot": "projects/michikowski/ng-flowchart/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/michikowski/ng-flowchart/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/michikowski/ng-flowchart/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/michikowski/ng-flowchart/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/michikowski/ng-flowchart/**/*.ts",
+              "projects/michikowski/ng-flowchart/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "ngx-flowchart": {
+      "projectType": "library",
+      "root": "projects/ngx-flowchart",
+      "sourceRoot": "projects/ngx-flowchart/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngx-flowchart/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ngx-flowchart/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/ngx-flowchart/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ngx-flowchart/**/*.ts",
+              "projects/ngx-flowchart/**/*.html"
             ]
           }
         }

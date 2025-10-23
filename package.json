@@ -1,10 +1,10 @@
 {
-  "name": "@michikowski/ng-flowchart",
-  "version": "1.0.0",
+  "name": "@michikowski/ngx-flowchart",
+  "version": "1.1.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build ng-flowchart --configuration production",
+    "build": "ng build ngx-flowchart --configuration production",
     "test": "ng test",
     "lint": "ng lint --fix",
     "prettier": "npx prettier --write .",
@@ -31,6 +31,7 @@
     "@angular-eslint/eslint-plugin-template": "20.4.0",
     "@angular-eslint/schematics": "20.4.0",
     "@angular-eslint/template-parser": "20.4.0",
+    "@angular/build": "^20.3.6",
     "@angular/cli": "^20.3.6",
     "@angular/compiler-cli": "^20.3.6",
     "@types/jasmine": "~5.1.12",
@@ -55,16 +56,8 @@
     "ts-node": "~10.9.2",
     "typescript": "~5.9.3"
   },
-  "description": "ng-flowchart for Angular 20",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MichaelJacobs97/ng-flowchart.git"
-  },
+  "description": "ngx-flowchart for Angular 20",
+  "main": "index.js",  
   "author": "michikowski",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/MichaelJacobs97/ng-flowchart/issues"
-  },
-  "homepage": "https://github.com/MichaelJacobs97/ng-flowchart#readme"
+  "license": "ISC"
 }

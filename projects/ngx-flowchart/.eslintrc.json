@@ -1,22 +1,24 @@
 {
   "extends": "../../.eslintrc.json",
-  "ignorePatterns": ["!**/*"],
+  "ignorePatterns": [
+    "!**/*"
+  ],
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": [
+        "*.ts"
+      ],
       "parserOptions": {
         "project": [
-          "projects/ng-flowchart/tsconfig.lib.json",
-          "projects/ng-flowchart/tsconfig.spec.json"
-        ],
-        "createDefaultProgram": true
+          "projects/ngx-flowchart/tsconfig.(lib|spec).json"
+        ]
       },
       "rules": {
         "@angular-eslint/directive-selector": [
           "error",
           {
             "type": "attribute",
-            "prefix": "ngFlowchart",
+            "prefix": "lib",
             "style": "camelCase"
           }
         ],
@@ -24,14 +26,16 @@
           "error",
           {
             "type": "element",
-            "prefix": "ng-flowchart",
+            "prefix": "lib",
             "style": "kebab-case"
           }
         ]
       }
     },
     {
-      "files": ["*.html"],
+      "files": [
+        "*.html"
+      ],
       "rules": {}
     }
   ]

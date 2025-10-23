@@ -9,6 +9,16 @@ export * from './lib/services/options.service';
 export * from './lib/ng-flowchart-step.directive';
 export * from './lib/ng-flowchart-step/ng-flowchart-step.component';
 export * from './lib/ng-flowchart-arrow/ng-flowchart-arrow.component';
+export * from './lib/ng-flowchart-connector/ng-flowchart-connector.component';
+export * from './lib/ng-flowchart-canvas.service';
+export * from './lib/ng-flowchart-step-registry.service';
+export * from './lib/ng-flowchart-step.directive';
+export * from './lib/ng-flowchart-step/ng-flowchart-step.component';
+export * from './lib/ng-flowchart-arrow/ng-flowchart-arrow.component';
+export * from './lib/ng-flowchart-connector/ng-flowchart-connector.component';
+export * from './lib/ng-flowchart-canvas.service';
+export * from './lib/ng-flowchart-step-registry.service';
+
 // In your fork's index.ts (main export file):
 export { NgFlowchartStepComponent } from './lib/ng-flowchart-step/ng-flowchart-step.component';
 export { NgFlowchartStepRegistry } from './lib/ng-flowchart-step-registry.service';
