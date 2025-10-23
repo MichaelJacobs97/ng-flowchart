@@ -84,4 +84,17 @@
       stroke="transparent"
       stroke-dasharray="none" />
   </g>
+  <!-- NEW: Render label at midpoint -->
+  @if (connector?.label) {
+    <g class="connector-label">
+      <text
+        [attr.x]="labelX"
+        [attr.y]="labelY"
+        text-anchor="middle"
+        dy="-5"
+        class="connector-label-text">
+        {{ connector.label }}
+      </text>
+    </g>
+  }
 </svg>

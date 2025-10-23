@@ -63,6 +63,15 @@
   }
 }
 
+// NEW: Connector label styling
+.connector-label-text {
+  font-size: 12px;
+  fill: #333;
+  font-weight: 500;
+  pointer-events: none;
+  user-select: none;
+}
+
 //To override connector style
 // .ngflowchart-connector {
 //   & #connectorArrowhead {

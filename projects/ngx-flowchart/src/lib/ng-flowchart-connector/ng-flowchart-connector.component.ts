@@ -114,6 +114,17 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     return this.canvas.options.options.orientation === 'HORIZONTAL' ? 6 : 0;
   }
 
+  // NEW: Calculate label position at midpoint
+  get labelX(): number {
+    if (!this._position) return 0;
+    return (this._position.start[0] + this._position.end[0]) / 2 - Math.min(this._position.start[0], this._position.end[0]);
+  }
+
+  get labelY(): number {
+    if (!this._position) return 0;
+    return (this._position.start[1] + this._position.end[1]) / 2 - Math.min(this._position.start[1], this._position.end[1]);
+  }
+
   ngAfterViewInit(): void {
     this.updatePath();
   }
@@ -122,6 +133,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     return {
       startStepId: this._connector.startStepId,
       endStepId: this._connector.endStepId,
+      label: this._connector.label,
+      labelData: this._connector.labelData
     };
   }
 
