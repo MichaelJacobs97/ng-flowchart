@@ -218,6 +218,11 @@ export namespace NgFlowchart {
   export type Connector = {
     startStepId: string;
     endStepId: string;
+    label?: string;           // NEW: Visual label text ("3 days", "5 check-ins")
+    labelData?: {             // NEW: Structured metadata
+      type?: 'days' | 'check-ins';
+      value?: number;
+    };
   };
 
   export enum DropType {
