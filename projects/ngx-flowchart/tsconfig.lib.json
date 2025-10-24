@@ -4,6 +4,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/lib",
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,

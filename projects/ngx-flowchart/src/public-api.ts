@@ -26,3 +26,5 @@ export { NgFlowchartCanvasDirective } from './lib/ng-flowchart-canvas.directive'
 export * from './lib/model/flow.model'; // Includes NgFlowchart namespace
 export * from './lib/services/options.service';
 export * from './lib/services/dropdata.service';
+export * from './lib/ng-flowchart-step.directive';
+export * from './lib/ng-flowchart-canvas.service';

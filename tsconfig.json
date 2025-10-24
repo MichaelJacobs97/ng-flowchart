@@ -3,9 +3,12 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
     "sourceMap": true,
     "esModuleInterop": true,
-    "declaration": false,
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
     "importHelpers": true,
