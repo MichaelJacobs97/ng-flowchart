@@ -16,13 +16,6 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM"],
     "paths": {
-      "@michikowski/ng-flowchart": [
-        "./dist/michikowski/ng-flowchart"
-      ],
-      "ng-flowchart": [
-        "dist/ng-flowchart/ng-flowchart",
-        "dist/ng-flowchart"
-      ],
       "ngx-flowchart": [
         "./dist/ngx-flowchart"
       ]
@@ -36,10 +29,10 @@
   },
   "references": [
     {
-      "path": "./projects/michikowski/ng-flowchart/tsconfig.lib.json"
+      "path": "./projects/ngx-flowchart/tsconfig.lib.json"
     },
     {
-      "path": "./projects/michikowski/ng-flowchart/tsconfig.spec.json"
+      "path": "./projects/ngx-flowchart/tsconfig.spec.json"
     },
     {
       "path": "./projects/ngx-flowchart/tsconfig.lib.json"

@@ -9,7 +9,10 @@ import {
 import { NgFlowchart } from './model/flow.model';
 import { DropDataService } from './services/dropdata.service';
 
-@Directive({ selector: '[ngFlowchartStep]' })
+@Directive({ 
+  selector: '[ngFlowchartStep]',
+  standalone: true
+})
 export class NgFlowchartStepDirective implements AfterViewInit {
   protected element = inject<ElementRef<HTMLElement>>(ElementRef);
   private data = inject(DropDataService);
