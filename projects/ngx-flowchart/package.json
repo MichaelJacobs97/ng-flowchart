@@ -1,6 +1,6 @@
 {
   "name": "@michikowski/ngx-flowchart",
-  "version": "1.4.0",
+  "version": "1.6.0",
   "peerDependencies": {
     "@angular/common": "^20.2.0",
     "@angular/core": "^20.2.0"
