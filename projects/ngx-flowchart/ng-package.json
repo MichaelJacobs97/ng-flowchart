@@ -3,5 +3,12 @@
   "dest": "../../dist/ngx-flowchart",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": [
+    {
+      "glob": "**/*.scss",
+      "input": "src/lib",
+      "output": "lib"
+    }
+  ]
 }
