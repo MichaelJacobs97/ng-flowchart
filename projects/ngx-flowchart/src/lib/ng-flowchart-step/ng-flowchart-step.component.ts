@@ -354,6 +354,10 @@ export class NgFlowchartStepComponent<T = any>
     return this._children;
   }
 
+  set children(value: NgFlowchartStepComponent[]) {
+    this._children = value;
+  }
+
   /** The parent step of this step */
   get parent() {
     return this._parent;
@@ -580,7 +584,7 @@ export class NgFlowchartStepComponent<T = any>
       conn.destroy0();
     }
 
-    if (this.isRootElement()) {
+    if (this.isRootElement() && this.canvas.flow.rootStep === this) {
       this.canvas.flow.rootStep = null;
     }
 

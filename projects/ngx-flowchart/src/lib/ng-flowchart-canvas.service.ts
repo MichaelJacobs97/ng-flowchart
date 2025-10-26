@@ -30,7 +30,9 @@ export class CanvasFlow {
   }
 
   addStep(step: NgFlowchartStepComponent) {
-    this._steps.push(step);
+    if (!this._steps.includes(step)) {
+      this._steps.push(step);
+    }
   }
 
   removeStep(step: NgFlowchartStepComponent) {
@@ -38,6 +40,14 @@ export class CanvasFlow {
     if (index >= 0) {
       this._steps.splice(index, 1);
     }
+  }
+
+  get rootSteps(): ReadonlyArray<NgFlowchartStepComponent> {
+    return this._steps.filter(step => !step.parent);
+  }
+
+  get floatingSteps(): ReadonlyArray<NgFlowchartStepComponent> {
+    return this.rootSteps.filter(step => step !== this.rootStep);
   }
 
   addConnector(comp: NgFlowchartConnectorComponent) {
@@ -87,11 +97,6 @@ export class NgFlowchartCanvasService {
     return this._disabled;
   }
 
-  noParentError = {
-    code: 'NO_PARENT',
-    message: 'Step was not dropped under a parent and is not the root node',
-  };
-
   public init(view: ViewContainerRef) {
     this.viewContainer = view;
     this.renderer.init(view);
@@ -121,15 +126,18 @@ export class NgFlowchartCanvasService {
       // step cannot be moved if not in this canvas
       return;
     }
-    if (step.canDrop(this.currentDropTarget, error)) {
+    if (!this.currentDropTarget || step.canDrop(this.currentDropTarget, error)) {
       if (step.isRootElement()) {
         this.renderer.updatePosition(step, drag);
         this.renderer.render(this.flow);
       } else if (this.currentDropTarget) {
+        this.detachFromParent(step);
         const response = this.addStepToFlow(step, this.currentDropTarget, true);
         this.renderer.render(this.flow, response.prettyRender);
       } else {
-        this.moveError(step, this.noParentError);
+        this.detachFromParent(step);
+        this.renderer.updatePosition(step, drag);
+        this.renderer.render(this.flow);
       }
       if (
         this.options.callbacks?.onDropStep &&
@@ -149,31 +157,39 @@ export class NgFlowchartCanvasService {
   public async onDrop(drag: DragEvent) {
     this.renderer.clearAllSnapIndicators(this.flow.steps);
 
-    if (this.flow.hasRoot() && !this.currentDropTarget) {
-      this.dropError(this.noParentError);
-      return;
-    }
+    const dropTarget = this.currentDropTarget ?? null;
 
     //TODO just pass dragStep here, but come up with a better name and move the type to flow.model
     let componentRef = await this.createStep(
       this.drag.dragStep as NgFlowchart.PendingStep
     );
 
-    const dropTarget = this.currentDropTarget || null;
     let error = {};
-    if (componentRef.instance.canDrop(dropTarget, error)) {
-      if (!this.flow.hasRoot()) {
-        this.renderer.renderRoot(componentRef, drag);
-        this.setRoot(componentRef.instance);
-      } else {
-        // if root is replaced by another step, rerender root to proper position
+    if (!dropTarget || componentRef.instance.canDrop(dropTarget, error)) {
+      if (dropTarget) {
+        if (!this.flow.hasRoot()) {
+          this.flow.rootStep = dropTarget.step.isRootElement()
+            ? dropTarget.step
+            : dropTarget.step.parent ?? dropTarget.step;
+        }
+
         if (
           dropTarget.step.isRootElement() &&
           dropTarget.position === 'ABOVE'
         ) {
           this.renderer.renderRoot(componentRef, drag);
         }
+
+        this.detachFromParent(componentRef.instance);
         this.addChildStep(componentRef, dropTarget);
+      } else if (!this.flow.hasRoot()) {
+        this.renderer.renderRoot(componentRef, drag);
+        this.setRoot(componentRef.instance);
+      } else {
+        this.renderer.renderNonRoot(componentRef, drag);
+        this.renderer.updatePosition(componentRef.instance, drag);
+        this.flow.addStep(componentRef.instance);
+        this.renderer.render(this.flow);
       }
 
       if (this.options.callbacks?.onDropStep) {
@@ -270,6 +286,11 @@ export class NgFlowchartCanvasService {
   ) {
     this.addToCanvas(componentRef);
     const response = this.addStepToFlow(componentRef.instance, dropTarget);
+    if (!this.flow.rootStep) {
+      this.flow.rootStep = dropTarget.step.isRootElement()
+        ? dropTarget.step
+        : componentRef.instance;
+    }
     this.renderer.render(this.flow, response.prettyRender);
   }
 
@@ -486,33 +507,58 @@ export class NgFlowchartCanvasService {
     }
   }
 
+  private attachStepToFlow(
+    parentStep: NgFlowchartStepComponent,
+    childStep: NgFlowchartStepComponent
+  ): boolean {
+    if (parentStep.children.includes(childStep)) {
+      return true;
+    }
+
+    this.detachFromParent(childStep);
+
+    const dropTarget: NgFlowchart.DropTarget = {
+      step: parentStep,
+      position: 'BELOW',
+    };
+
+    const response = this.addStepToFlow(childStep, dropTarget);
+    if (!response.added) {
+      return false;
+    }
+
+    if (!this.flow.steps.includes(childStep)) {
+      this.flow.addStep(childStep);
+    }
+    parentStep.zaddChildSibling0(childStep);
+    childStep.setParent(parentStep, true);
+    this.renderer.render(this.flow, response.prettyRender);
+    return true;
+  }
+
   public linkConnector(startStepId: string, endStepId: string) {
     if (!this.options.options.manualConnectors) {
       return;
     }
-    //connection can't be to self
-    var isSameStep = startStepId === endStepId;
-    //no duplicate connections
+    const startStep = this.flow.steps.find(s => s.id === startStepId);
+    const endStep = this.flow.steps.find(s => s.id === endStepId);
+
+    if (!startStep || !endStep || startStep === endStep) {
+      return;
+    }
+
+    if (this.attachStepToFlow(startStep, endStep)) {
+      return;
+    }
+
     const isExistingConn = this.flow.connectors.some(
       c =>
         c.connector.startStepId === startStepId &&
         c.connector.endStepId === endStepId
     );
-    //nested canvas doesn't yet support connectors cross canvas
-    const stepsInSameCanvas =
-      this.flow.steps.some(s => s.id === startStepId) &&
-      this.flow.steps.some(s => s.id === endStepId);
-    //step is already connected by normal step child
-    const stepAlreadyChild = this.flow.steps
-      .find(s => s.id === startStepId)
-      ?.children.find(c => c.id === endStepId);
+    const stepAlreadyChild = startStep.children.find(c => c.id === endStepId);
 
-    if (
-      !isSameStep &&
-      !isExistingConn &&
-      stepsInSameCanvas &&
-      !stepAlreadyChild
-    ) {
+    if (!isExistingConn && !stepAlreadyChild) {
       var connector = { startStepId: startStepId, endStepId: endStepId };
       var connComponent = this.createConnector(connector);
       this.renderer.renderConnector(connComponent);
@@ -539,5 +585,16 @@ export class NgFlowchartCanvasService {
 
   public scaleCoordinate(pos: number[]): number[] {
     return this.renderer.scaleCoordinate(pos);
+  }
+
+  private detachFromParent(step: NgFlowchartStepComponent) {
+    if (!step.parent) {
+      return;
+    }
+
+    const parent = step.parent;
+    parent.removeChild(step);
+    step.setParent(null, true);
+    parent.destroyConnectors(step.id);
   }
 }
