@@ -511,28 +511,24 @@ export class NgFlowchartCanvasService {
     parentStep: NgFlowchartStepComponent,
     childStep: NgFlowchartStepComponent
   ): boolean {
+    // If already a direct child, nothing to do
     if (parentStep.children.includes(childStep)) {
       return true;
     }
 
+    // Detach from any previous parent
     this.detachFromParent(childStep);
 
-    const dropTarget: NgFlowchart.DropTarget = {
-      step: parentStep,
-      position: 'BELOW',
-    };
+    // Append as a sibling child of the parent (do NOT reparent existing children)
+    parentStep.zaddChildSibling0(childStep);
 
-    const response = this.addStepToFlow(childStep, dropTarget);
-    if (!response.added) {
-      return false;
-    }
-
+    // Ensure the step is tracked in the canvas flow
     if (!this.flow.steps.includes(childStep)) {
       this.flow.addStep(childStep);
     }
-    parentStep.zaddChildSibling0(childStep);
-    childStep.setParent(parentStep, true);
-    this.renderer.render(this.flow, response.prettyRender);
+
+    // Render with pretty reflow so connectors/parents update immediately
+    this.renderer.render(this.flow, true);
     return true;
   }
 
