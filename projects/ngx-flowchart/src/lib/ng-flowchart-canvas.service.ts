@@ -512,7 +512,12 @@ export class NgFlowchartCanvasService {
     childStep: NgFlowchartStepComponent
   ): boolean {
     // Avoid duplicate parent relationships
-    if (parentStep.hasParent(childStep) || childStep.parents.includes(parentStep)) {
+    if (
+      parentStep === childStep ||
+      parentStep.hasParent(childStep) ||
+      childStep.parents.includes(parentStep) ||
+      this.wouldCreateCycle(parentStep, childStep)
+    ) {
       return false;
     }
 
@@ -527,6 +532,34 @@ export class NgFlowchartCanvasService {
     // Render so connectors/parents update immediately
     this.renderer.render(this.flow, true);
     return true;
+  }
+
+  private wouldCreateCycle(
+    parentCandidate: NgFlowchartStepComponent,
+    childStep: NgFlowchartStepComponent
+  ): boolean {
+    if (!parentCandidate || !childStep) {
+      return false;
+    }
+
+    const visited = new Set<NgFlowchartStepComponent>();
+    const stack: NgFlowchartStepComponent[] = [...parentCandidate.parents];
+
+    while (stack.length) {
+      const current = stack.pop();
+      if (!current || visited.has(current)) {
+        continue;
+      }
+
+      if (current === childStep) {
+        return true;
+      }
+
+      visited.add(current);
+      stack.push(...current.parents);
+    }
+
+    return false;
   }
 
   public linkConnector(startStepId: string, endStepId: string) {

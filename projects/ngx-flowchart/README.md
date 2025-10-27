@@ -54,8 +54,12 @@ paletteStep: NgFlowchart.PendingStep = {
 
 ## Features
 
+- **Orthogonal Connector Routing**: right-angled connector paths with horizontal/vertical segments for improved readability.
 - **Free-floating drops**: palette steps can be placed anywhere and later attached.
 - **Manual connectors**: link any two steps with interactive connector pads and optional labels.
+- **Multi-parent DAG support**: complex flowchart structures with multiple parents per step.
+- **Smart label positioning**: connector labels placed on longest path segment for optimal visibility.
+- **Lane offsets**: automatic spacing for multiple connectors targeting the same step.
 - **Source shipping**: TypeScript/HTML files are included in the npm package.
 - **Upload/download API**: serialize flows via `NgFlowchart.Flow` helpers.
 - **Standalone-friendly**: directives/services ready for Angular standalone usage.

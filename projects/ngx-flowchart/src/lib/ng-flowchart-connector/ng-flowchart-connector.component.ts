@@ -126,10 +126,20 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     if (!this._position) {
       return 0;
     }
-    const originX =
-      Math.min(this._position.start[0], this._position.end[0]) - this._padX;
-    const midX =
-      (this._position.start[0] + this._position.end[0]) / 2 - originX;
+
+    // For orthogonal paths, position label on the longest segment
+    const pathSegments = this.getPathSegments();
+    const longestSegment = this.findLongestSegment(pathSegments);
+
+    if (longestSegment) {
+      const originX = Math.min(this._position.start[0], this._position.end[0]) - this._padX;
+      const midX = (longestSegment.start[0] + longestSegment.end[0]) / 2 - originX;
+      return midX;
+    }
+
+    // Fallback to midpoint
+    const originX = Math.min(this._position.start[0], this._position.end[0]) - this._padX;
+    const midX = (this._position.start[0] + this._position.end[0]) / 2 - originX;
     return midX;
   }
 
@@ -137,11 +147,106 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     if (!this._position) {
       return 0;
     }
-    const originY =
-      Math.min(this._position.start[1], this._position.end[1]) - this._padY;
-    const midY =
-      (this._position.start[1] + this._position.end[1]) / 2 - originY;
+
+    // For orthogonal paths, position label on the longest segment
+    const pathSegments = this.getPathSegments();
+    const longestSegment = this.findLongestSegment(pathSegments);
+
+    if (longestSegment) {
+      const originY = Math.min(this._position.start[1], this._position.end[1]) - this._padY;
+      const midY = (longestSegment.start[1] + longestSegment.end[1]) / 2 - originY;
+      return midY;
+    }
+
+    // Fallback to midpoint
+    const originY = Math.min(this._position.start[1], this._position.end[1]) - this._padY;
+    const midY = (this._position.start[1] + this._position.end[1]) / 2 - originY;
     return midY;
+  }
+
+  private getPathSegments(): Array<{start: number[], end: number[]}> {
+    if (!this._position) {
+      return [];
+    }
+
+    const start = new Array(2);
+    const end = new Array(2);
+
+    // Calculate actual start and end points within the container
+    if (this._position.start[1] > this._position.end[1]) {
+      start[1] = this.containerHeight - this._padY + this.yOffset;
+      end[1] = this._padY;
+    } else {
+      start[1] = this._padY + this.yOffset;
+      end[1] = this.containerHeight - this._padY;
+    }
+
+    if (this._position.start[0] > this._position.end[0]) {
+      start[0] = this.containerWidth - this._padX + this.xOffset;
+      end[0] = this._padX;
+    } else if (this._position.start[0] < this._position.end[0]) {
+      start[0] = this._padX + this.xOffset;
+      end[0] = this.containerWidth - this._padX;
+    } else {
+      const centerX = this.containerWidth / 2;
+      start[0] = centerX + this.xOffset;
+      end[0] = centerX;
+    }
+
+    // Generate the segments based on the orthogonal path
+    const segments: Array<{start: number[], end: number[]}> = [];
+    const path = this.createOrthogonalSegments(start, end);
+
+    // Parse the path to extract segments
+    const pathCommands = path.split('L');
+    if (pathCommands.length >= 2) {
+      const startMatch = path.match(/M([-\d.]+)\s+([-\d.]+)/);
+      if (startMatch) {
+        let currentX = parseFloat(startMatch[1]);
+        let currentY = parseFloat(startMatch[2]);
+
+        for (let i = 1; i < pathCommands.length; i++) {
+          const coords = pathCommands[i].trim().split(/\s+/);
+          if (coords.length >= 2) {
+            const endX = parseFloat(coords[0]);
+            const endY = parseFloat(coords[1]);
+
+            segments.push({
+              start: [currentX, currentY],
+              end: [endX, endY]
+            });
+
+            currentX = endX;
+            currentY = endY;
+          }
+        }
+      }
+    }
+
+    return segments;
+  }
+
+  private findLongestSegment(segments: Array<{start: number[], end: number[]}>): {start: number[], end: number[]} | null {
+    if (segments.length === 0) {
+      return null;
+    }
+
+    let longestSegment = segments[0];
+    let maxLength = this.getDistance(longestSegment.start, longestSegment.end);
+
+    for (const segment of segments) {
+      const length = this.getDistance(segment.start, segment.end);
+      if (length > maxLength) {
+        maxLength = length;
+        longestSegment = segment;
+      }
+    }
+
+    return longestSegment;
+  }
+
+  private getDistance(point1: number[], point2: number[]): number {
+    return Math.sqrt(Math.pow(point2[0] - point1[0], 2) + Math.pow(point2[1] - point1[1], 2));
   }
 
   ngAfterViewInit(): void {
@@ -223,34 +328,73 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
 
     const padX = this._padX;
     const padY = this._padY;
+
+    // Generate orthogonal path instead of straight line
+    const path = this.generateOrthogonalPath();
+    arrowValue.nativeElement.setAttribute('d', path);
+    this.arrowPadding().nativeElement.setAttribute('d', path);
+  }
+
+  private generateOrthogonalPath(): string {
     const start = new Array(2);
     const end = new Array(2);
 
+    // Calculate actual start and end points within the container
     if (this._position.start[1] > this._position.end[1]) {
-      start[1] = this.containerHeight - padY + this.yOffset;
-      end[1] = padY;
+      start[1] = this.containerHeight - this._padY + this.yOffset;
+      end[1] = this._padY;
     } else {
-      start[1] = padY + this.yOffset;
-      end[1] = this.containerHeight - padY;
+      start[1] = this._padY + this.yOffset;
+      end[1] = this.containerHeight - this._padY;
     }
 
     if (this._position.start[0] > this._position.end[0]) {
-      start[0] = this.containerWidth - padX + this.xOffset;
-      end[0] = padX;
+      start[0] = this.containerWidth - this._padX + this.xOffset;
+      end[0] = this._padX;
     } else if (this._position.start[0] < this._position.end[0]) {
-      start[0] = padX + this.xOffset;
-      end[0] = this.containerWidth - padX;
+      start[0] = this._padX + this.xOffset;
+      end[0] = this.containerWidth - this._padX;
     } else {
       const centerX = this.containerWidth / 2;
       start[0] = centerX + this.xOffset;
       end[0] = centerX;
     }
 
-    const arrow = `
-      M${start[0]} ${start[1]}
-      L${end[0]} ${end[1]}
-    `;
-    arrowValue.nativeElement.setAttribute('d', arrow);
-    this.arrowPadding().nativeElement.setAttribute('d', arrow);
+    // Generate orthogonal path with right angles
+    return this.createOrthogonalSegments(start, end);
+  }
+
+  private createOrthogonalSegments(start: number[], end: number[]): string {
+    const segments: string[] = [];
+
+    // Start from the actual start position
+    segments.push(`M${start[0]} ${start[1]}`);
+
+    // Create orthogonal path based on orientation
+    if (this.canvas.options.options.orientation === 'VERTICAL') {
+      // For vertical orientation, prefer vertical segments first
+      if (Math.abs(start[0] - end[0]) > Math.abs(start[1] - end[1])) {
+        // Horizontal distance is greater, go horizontal first
+        segments.push(`L${end[0]} ${start[1]}`);
+        segments.push(`L${end[0]} ${end[1]}`);
+      } else {
+        // Vertical distance is greater, go vertical first
+        segments.push(`L${start[0]} ${end[1]}`);
+        segments.push(`L${end[0]} ${end[1]}`);
+      }
+    } else {
+      // For horizontal orientation, prefer horizontal segments first
+      if (Math.abs(start[1] - end[1]) > Math.abs(start[0] - end[0])) {
+        // Vertical distance is greater, go vertical first
+        segments.push(`L${start[0]} ${end[1]}`);
+        segments.push(`L${end[0]} ${end[1]}`);
+      } else {
+        // Horizontal distance is greater, go horizontal first
+        segments.push(`L${end[0]} ${start[1]}`);
+        segments.push(`L${end[0]} ${end[1]}`);
+      }
+    }
+
+    return segments.join(' ');
   }
 }

@@ -676,12 +676,39 @@ export class CanvasRendererService {
   }
 
   private drawConnectors(flow: CanvasFlow, canvasRect: DOMRect): void {
+    // Group connectors by target step to handle lane offsets
+    const connectorsByTarget = new Map<string, NgFlowchartConnectorComponent[]>();
+
     for (const conn of flow.connectors) {
-      const startStep = flow.steps.find(
-        s => s.id === conn.connector.startStepId
-      );
+      const targetId = conn.connector.endStepId;
+      if (!connectorsByTarget.has(targetId)) {
+        connectorsByTarget.set(targetId, []);
+      }
+      connectorsByTarget.get(targetId)!.push(conn);
+    }
+
+    for (const [targetId, connectors] of connectorsByTarget) {
+      this.positionConnectorsForTarget(flow, connectors, canvasRect);
+    }
+  }
+
+  private positionConnectorsForTarget(flow: CanvasFlow, connectors: NgFlowchartConnectorComponent[], canvasRect: DOMRect): void {
+    const targetStep = flow.steps.find(s => s.id === connectors[0].connector.endStepId);
+    if (!targetStep) {
+      // Skip positioning connectors if target step doesn't exist
+      return;
+    }
+    const targetStepRect = targetStep.getCurrentRect(canvasRect);
+
+    for (const conn of connectors) {
+      const startStep = flow.steps.find(s => s.id === conn.connector.startStepId);
+      if (!startStep) {
+        // Skip positioning this connector if start step doesn't exist
+        continue;
+      }
       const startStepRect = startStep.getCurrentRect(canvasRect);
       let startStepPos: number[];
+
       if (this.options.options.orientation === 'VERTICAL') {
         startStepPos = [
           startStepRect.left -
@@ -691,7 +718,7 @@ export class CanvasRendererService {
             canvasRect.top +
             startStepRect.height / this.scale,
         ];
-      } else if (this.options.options.orientation === 'HORIZONTAL') {
+      } else {
         startStepPos = [
           startStepRect.left -
             canvasRect.left +
@@ -702,10 +729,86 @@ export class CanvasRendererService {
         ];
       }
 
-      const endStep = flow.steps.find(s => s.id === conn.connector.endStepId);
-      const endStepRect = endStep.getCurrentRect();
-      const closestEndEdge = this.findClosestEndEdge(startStepPos, endStepRect);
-      conn.autoPosition = { start: startStepPos, end: closestEndEdge };
+      // Calculate base end position
+      const baseEndPos = this.findClosestEndEdge(startStepPos, targetStepRect);
+
+      // For multiple connectors to the same target, calculate lane offsets
+      const laneOffset = this.calculateLaneOffset(connectors, conn, targetStepRect, canvasRect, flow, this.options.options.orientation);
+
+      // Apply offset to end position
+      const adjustedEndPos = [
+        baseEndPos[0] + laneOffset[0],
+        baseEndPos[1] + laneOffset[1]
+      ];
+
+      conn.autoPosition = { start: startStepPos, end: adjustedEndPos };
+    }
+  }
+
+  private calculateLaneOffset(
+    connectors: NgFlowchartConnectorComponent[],
+    currentConnector: NgFlowchartConnectorComponent,
+    targetStepRect: Partial<DOMRect>,
+    canvasRect: DOMRect,
+    flow: CanvasFlow,
+    orientation: 'VERTICAL' | 'HORIZONTAL'
+  ): number[] {
+    if (connectors.length <= 1) {
+      return [0, 0];
+    }
+
+    // Sort connectors by their start position to create consistent lane ordering
+    const sortedConnectors = connectors.slice().sort((a, b) => {
+      const startStepA = flow.steps.find(s => s.id === a.connector.startStepId);
+      const startStepB = flow.steps.find(s => s.id === b.connector.startStepId);
+
+      // Skip connectors with missing steps
+      if (!startStepA || !startStepB) {
+        return 0; // neutral sort order for missing steps
+      }
+
+      const rectA = startStepA.getCurrentRect(canvasRect);
+      const rectB = startStepB.getCurrentRect(canvasRect);
+
+      if (orientation === 'VERTICAL') {
+        return rectA.left - rectB.left;
+      } else {
+        return rectA.top - rectB.top;
+      }
+    });
+
+    const connectorIndex = sortedConnectors.findIndex(conn =>
+      conn.connector.startStepId === currentConnector.connector.startStepId &&
+      conn.connector.endStepId === currentConnector.connector.endStepId
+    );
+
+    if (connectorIndex === -1) {
+      return [0, 0];
+    }
+
+    // Calculate offset based on orientation
+    const laneSpacing = 15; // pixels between lanes
+    const offsetIndex = connectorIndex;
+
+    if (orientation === 'VERTICAL') {
+      return [offsetIndex * laneSpacing, 0];
+    } else {
+      return [0, offsetIndex * laneSpacing];
+    }
+  }
+
+  private getAttachmentSide(endPos: number[], stepRect: Partial<DOMRect>, orientation: 'VERTICAL' | 'HORIZONTAL'): string {
+    const scaledWidth = stepRect.width / this.scale;
+    const scaledHeight = stepRect.height / this.scale;
+
+    if (orientation === 'VERTICAL') {
+      if (Math.abs(endPos[0] - stepRect.left) < 5) return 'left';
+      if (Math.abs(endPos[0] - (stepRect.left + scaledWidth)) < 5) return 'right';
+      return 'top';
+    } else {
+      if (Math.abs(endPos[1] - stepRect.top) < 5) return 'top';
+      if (Math.abs(endPos[1] - (stepRect.top + scaledHeight)) < 5) return 'bottom';
+      return 'left';
     }
   }
 

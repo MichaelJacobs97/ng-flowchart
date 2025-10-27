@@ -1,6 +1,6 @@
 # NgFlowchart
 
-[Demo](https://joelwenzel.com/projects/flowchart?palette=standard) | [Npm](https://www.npmjs.com/package/@joelwenzel/ng-flowchart) | [Getting started](#getting-started) | [Wiki](https://github.com/joel-wenzel/ng-flowchart/wiki/NgFlowchart)
+[Demo](https://joelwenzel.com/projects/flowchart?palette=standard) | [Npm](https://www.npmjs.com/package/@michikowski/ngx-flowchart) | [Getting started](#getting-started) | [Wiki](https://github.com/joel-wenzel/ng-flowchart/wiki/NgFlowchart)
 
 A lightweight Angular Library for building drag and drop flow charts. Chart behavior and steps are customizable. Data can be exported or uploaded in json format.
 
@@ -22,11 +22,19 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
 ## Change Log
 
+- 1.3.1
+  - **Orthogonal Connector Routing**: Restored right-angled connector paths for improved readability
+    - Connectors now render with horizontal/vertical segments and 90° bends instead of diagonals
+    - Smart label positioning on the longest path segment for optimal visibility
+    - Lane offsets for multi-parent scenarios prevent connector overlap
+    - Maintains full compatibility with DAG structures, manual connectors, and serialization
+    - Works in both VERTICAL and HORIZONTAL canvas orientations
+
 - 1.0.0-beta.30
   - Angular 17 & 18 support
     - Requires use of `{ provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false }`
       OR
-      `@import '@joelwenzel/ng-flowchart/assets/styles.scss';`
+      `@import '@michikowski/ngx-flowchart/assets/styles.scss';`
       to apply base step styles as Angular breaks base Component style inheritance with the new default `REMOVE_STYLES_ON_COMPONENT_DESTROY: true`
 - 1.0.2-beta
   - Support for canvas zoom/scale via mouse scroll or manual
@@ -40,28 +48,42 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
 ## Current and Upcoming Feature List
 
+- [NgFlowchart](#ngflowchart)
+- [Contents](#contents)
+  - [Supported Angular versions](#supported-angular-versions)
+  - [Change Log](#change-log)
+  - [Current and Upcoming Feature List](#current-and-upcoming-feature-list)
+- [Getting started](#getting-started)
+  - [If you enjoy it give it a star](#if-you-enjoy-it-give-it-a-star)
 - [Chart API](#chart-api)
-- [Getting Output JSON](#generating-output-json)
-- [Uploading from JSON](#uploading-json)
+  - [Flow Object Methods](#flow-object-methods)
+  - [Step Object Methods and Properties](#step-object-methods-and-properties)
+- [Generating Output JSON](#generating-output-json)
+- [Uploading JSON](#uploading-json)
 - [Controlling Behavior](#controlling-behavior)
+  - [Options](#options)
+  - [Callbacks](#callbacks)
 - [Custom Steps](#custom-steps)
 - [Theming](#theming)
-- [Storing step data](#storing-step-data)
-- [Disabling the chart](#disabling-the-chart)
+- [Storing Step Data](#storing-step-data)
+- [Disabling the Chart](#disabling-the-chart)
+- [Contributers](#contributers)
+- [FAQ](#faq)
+    - [Undefined variables in a callback](#undefined-variables-in-a-callback)
 
 # Getting started
 
 1. Install it.
 
 ```
-npm i --save @joelwenzel/ng-flowchart
+npm i --save @michikowski/ngx-flowchart
 ```
 
 2. Import it.  
    In your app module or module that contains your editor, import `NgFlowchartModule`.
 
 ```
-import { NgFlowchartModule } from '@joelwenzel/ng-flowchart';
+import { NgFlowchartModule } from '@michikowski/ngx-flowchart';
 
 @NgModule({
   imports: [
