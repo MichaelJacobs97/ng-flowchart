@@ -127,20 +127,16 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
       return 0;
     }
 
-    // For orthogonal paths, position label on the longest segment
+    // For orthogonal paths, position label on the longest segment (container-relative coordinates)
     const pathSegments = this.getPathSegments();
     const longestSegment = this.findLongestSegment(pathSegments);
 
     if (longestSegment) {
-      const originX = Math.min(this._position.start[0], this._position.end[0]) - this._padX;
-      const midX = (longestSegment.start[0] + longestSegment.end[0]) / 2 - originX;
-      return midX;
+      return (longestSegment.start[0] + longestSegment.end[0]) / 2;
     }
 
-    // Fallback to midpoint
-    const originX = Math.min(this._position.start[0], this._position.end[0]) - this._padX;
-    const midX = (this._position.start[0] + this._position.end[0]) / 2 - originX;
-    return midX;
+    // Fallback to midpoint (container-relative coordinates)
+    return (this._position.end[0] - this._position.start[0]) / 2;
   }
 
   get labelY(): number {
@@ -148,20 +144,16 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
       return 0;
     }
 
-    // For orthogonal paths, position label on the longest segment
+    // For orthogonal paths, position label on the longest segment (container-relative coordinates)
     const pathSegments = this.getPathSegments();
     const longestSegment = this.findLongestSegment(pathSegments);
 
     if (longestSegment) {
-      const originY = Math.min(this._position.start[1], this._position.end[1]) - this._padY;
-      const midY = (longestSegment.start[1] + longestSegment.end[1]) / 2 - originY;
-      return midY;
+      return (longestSegment.start[1] + longestSegment.end[1]) / 2;
     }
 
-    // Fallback to midpoint
-    const originY = Math.min(this._position.start[1], this._position.end[1]) - this._padY;
-    const midY = (this._position.start[1] + this._position.end[1]) / 2 - originY;
-    return midY;
+    // Fallback to midpoint (container-relative coordinates)
+    return (this._position.end[1] - this._position.start[1]) / 2;
   }
 
   private getPathSegments(): Array<{start: number[], end: number[]}> {
@@ -169,33 +161,9 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
       return [];
     }
 
-    const start = new Array(2);
-    const end = new Array(2);
-
-    // Calculate actual start and end points within the container
-    if (this._position.start[1] > this._position.end[1]) {
-      start[1] = this.containerHeight - this._padY + this.yOffset;
-      end[1] = this._padY;
-    } else {
-      start[1] = this._padY + this.yOffset;
-      end[1] = this.containerHeight - this._padY;
-    }
-
-    if (this._position.start[0] > this._position.end[0]) {
-      start[0] = this.containerWidth - this._padX + this.xOffset;
-      end[0] = this._padX;
-    } else if (this._position.start[0] < this._position.end[0]) {
-      start[0] = this._padX + this.xOffset;
-      end[0] = this.containerWidth - this._padX;
-    } else {
-      const centerX = this.containerWidth / 2;
-      start[0] = centerX + this.xOffset;
-      end[0] = centerX;
-    }
-
-    // Generate the segments based on the orthogonal path
+    // Generate the segments based on the orthogonal path (already container-relative)
     const segments: Array<{start: number[], end: number[]}> = [];
-    const path = this.createOrthogonalSegments(start, end);
+    const path = this.generateOrthogonalPath();
 
     // Parse the path to extract segments
     const pathCommands = path.split('L');
@@ -311,10 +279,9 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
       return;
     }
 
-    const left =
-      Math.min(this._position.start[0], this._position.end[0]) - this._padX;
-    const top =
-      Math.min(this._position.start[1], this._position.end[1]) - this._padY;
+    // Position container at the start of the path using absolute coordinates
+    const left = this._position.start[0];
+    const top = this._position.start[1];
 
     this.element.nativeElement.style.left = `${left}px`;
     this.element.nativeElement.style.top = `${top}px`;
@@ -336,29 +303,13 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   }
 
   private generateOrthogonalPath(): string {
-    const start = new Array(2);
-    const end = new Array(2);
-
-    // Calculate actual start and end points within the container
-    if (this._position.start[1] > this._position.end[1]) {
-      start[1] = this.containerHeight - this._padY + this.yOffset;
-      end[1] = this._padY;
-    } else {
-      start[1] = this._padY + this.yOffset;
-      end[1] = this.containerHeight - this._padY;
-    }
-
-    if (this._position.start[0] > this._position.end[0]) {
-      start[0] = this.containerWidth - this._padX + this.xOffset;
-      end[0] = this._padX;
-    } else if (this._position.start[0] < this._position.end[0]) {
-      start[0] = this._padX + this.xOffset;
-      end[0] = this.containerWidth - this._padX;
-    } else {
-      const centerX = this.containerWidth / 2;
-      start[0] = centerX + this.xOffset;
-      end[0] = centerX;
-    }
+    // Calculate path coordinates relative to container (which is positioned at start)
+    // Container starts at (0,0) in its coordinate system, end is at (relativeX, relativeY)
+    const start = [0, 0]; // Container starts at start position
+    const end = [
+      this._position.end[0] - this._position.start[0],
+      this._position.end[1] - this._position.start[1]
+    ];
 
     // Generate orthogonal path with right angles
     return this.createOrthogonalSegments(start, end);

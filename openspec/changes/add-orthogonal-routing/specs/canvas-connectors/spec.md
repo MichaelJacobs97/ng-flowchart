@@ -20,3 +20,19 @@ The canvas SHALL render connectors using orthogonal (horizontal + vertical) segm
 - **THEN** the resulting connector renders orthogonally with bends recalculated using the current step positions
 - **AND** serialization (`NgFlowchart.Flow.toJSON`) maintains only step IDs and label data, allowing uploads to recompute the same orthogonal path.
 
+### Requirement: Coordinate System Compatibility
+The canvas SHALL handle coordinate transformations correctly to ensure connector arrows reach their target nodes.
+
+#### Scenario: Absolute coordinate usage
+- **GIVEN** the canvas renderer calculates connector positions using `findClosestEndEdge`
+- **WHEN** these coordinates are passed to the connector component
+- **THEN** the coordinates SHALL be treated as absolute canvas coordinates
+- **AND** the connector container SHALL be positioned correctly to align with these absolute coordinates
+- **AND** the connector arrow SHALL reach the target node without coordinate transformation errors
+
+#### Scenario: Step distance consistency
+- **GIVEN** manual connectors are created between steps
+- **WHEN** the connector positions are calculated
+- **THEN** the positioning SHALL use predefined step distances (stepGap) similar to tree layout
+- **AND** connectors SHALL maintain consistent spacing regardless of manual or automatic creation
+

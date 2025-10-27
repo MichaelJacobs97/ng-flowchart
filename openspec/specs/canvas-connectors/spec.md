@@ -47,3 +47,19 @@ The system SHALL support manual connector creation and serialization while maint
 - **WHEN** the flow is loaded
 - **THEN** connector paths are recalculated using current step positions
 - **AND** orthogonal routing is applied with lane offsets for multi-parent scenarios
+
+### Requirement: Coordinate System Compatibility
+The canvas SHALL handle coordinate transformations correctly to ensure connector arrows reach their target nodes.
+
+#### Scenario: Absolute coordinate usage
+- **GIVEN** the canvas renderer calculates connector positions using `findClosestEndEdge`
+- **WHEN** these coordinates are passed to the connector component
+- **THEN** the coordinates SHALL be treated as absolute canvas coordinates
+- **AND** the connector container SHALL be positioned correctly to align with these absolute coordinates
+- **AND** the connector arrow SHALL reach the target node without coordinate transformation errors
+
+#### Scenario: Step distance consistency
+- **GIVEN** manual connectors are created between steps
+- **WHEN** the connector positions are calculated
+- **THEN** the positioning SHALL use predefined step distances (stepGap) similar to tree layout
+- **AND** connectors SHALL maintain consistent spacing regardless of manual or automatic creation

@@ -711,26 +711,18 @@ export class CanvasRendererService {
 
       if (this.options.options.orientation === 'VERTICAL') {
         startStepPos = [
-          startStepRect.left -
-            canvasRect.left +
-            (startStepRect.width / this.scale) * (2 / 3),
-          startStepRect.top -
-            canvasRect.top +
-            startStepRect.height / this.scale,
+          startStepRect.left - canvasRect.left + (startStepRect.width * 2 / 3),
+          startStepRect.top - canvasRect.top + startStepRect.height,
         ];
       } else {
         startStepPos = [
-          startStepRect.left -
-            canvasRect.left +
-            startStepRect.width / this.scale,
-          startStepRect.top -
-            canvasRect.top +
-            (startStepRect.height / this.scale) * (1 / 5),
+          startStepRect.left - canvasRect.left + startStepRect.width,
+          startStepRect.top - canvasRect.top + (startStepRect.height / 5),
         ];
       }
 
       // Calculate base end position
-      const baseEndPos = this.findClosestEndEdge(startStepPos, targetStepRect);
+      const baseEndPos = this.findClosestEndEdge(startStepPos, targetStepRect, canvasRect);
 
       // For multiple connectors to the same target, calculate lane offsets
       const laneOffset = this.calculateLaneOffset(connectors, conn, targetStepRect, canvasRect, flow, this.options.options.orientation);
@@ -770,10 +762,20 @@ export class CanvasRendererService {
       const rectA = startStepA.getCurrentRect(canvasRect);
       const rectB = startStepB.getCurrentRect(canvasRect);
 
+      // Convert to canvas coordinates for comparison
+      const canvasRectA = {
+        left: rectA.left - canvasRect.left,
+        top: rectA.top - canvasRect.top
+      };
+      const canvasRectB = {
+        left: rectB.left - canvasRect.left,
+        top: rectB.top - canvasRect.top
+      };
+
       if (orientation === 'VERTICAL') {
-        return rectA.left - rectB.left;
+        return canvasRectA.left - canvasRectB.left;
       } else {
-        return rectA.top - rectB.top;
+        return canvasRectA.top - canvasRectB.top;
       }
     });
 
@@ -786,8 +788,8 @@ export class CanvasRendererService {
       return [0, 0];
     }
 
-    // Calculate offset based on orientation
-    const laneSpacing = 15; // pixels between lanes
+    // Calculate offset based on orientation and stepGap for consistent spacing
+    const laneSpacing = this.getStepGap() / 2; // Use half stepGap for lane spacing
     const offsetIndex = connectorIndex;
 
     if (orientation === 'VERTICAL') {
@@ -797,20 +799,6 @@ export class CanvasRendererService {
     }
   }
 
-  private getAttachmentSide(endPos: number[], stepRect: Partial<DOMRect>, orientation: 'VERTICAL' | 'HORIZONTAL'): string {
-    const scaledWidth = stepRect.width / this.scale;
-    const scaledHeight = stepRect.height / this.scale;
-
-    if (orientation === 'VERTICAL') {
-      if (Math.abs(endPos[0] - stepRect.left) < 5) return 'left';
-      if (Math.abs(endPos[0] - (stepRect.left + scaledWidth)) < 5) return 'right';
-      return 'top';
-    } else {
-      if (Math.abs(endPos[1] - stepRect.top) < 5) return 'top';
-      if (Math.abs(endPos[1] - (stepRect.top + scaledHeight)) < 5) return 'bottom';
-      return 'left';
-    }
-  }
 
   private drawConnectorPads(flow: CanvasFlow, canvasRect: DOMRect): void {
     for (const step of flow.steps) {
@@ -818,17 +806,11 @@ export class CanvasRendererService {
       let padX: number;
       let padY: number;
       if (this.options.options.orientation === 'VERTICAL') {
-        padX =
-          stepRect.left -
-          canvasRect.left +
-          (stepRect.width / this.scale) * (2 / 3);
-        padY = stepRect.top - canvasRect.top + stepRect.height / this.scale;
+        padX = stepRect.left - canvasRect.left + (stepRect.width * 2 / 3);
+        padY = stepRect.top - canvasRect.top + stepRect.height;
       } else if (this.options.options.orientation === 'HORIZONTAL') {
-        padX = stepRect.left - canvasRect.left + stepRect.width / this.scale;
-        padY =
-          stepRect.top -
-          canvasRect.top +
-          (stepRect.height / this.scale) * (1 / 5);
+        padX = stepRect.left - canvasRect.left + stepRect.width;
+        padY = stepRect.top - canvasRect.top + (stepRect.height / 5);
       }
       step.drawConnectorPad([padX, padY]);
     }
@@ -836,51 +818,33 @@ export class CanvasRendererService {
 
   private findClosestEndEdge(
     startPos: number[],
-    stepRect: Partial<DOMRect>
+    stepRect: Partial<DOMRect>,
+    canvasRect: DOMRect
   ): number[] {
-    let sides: number[][];
-    let scaledHeight = stepRect.height / this.scale;
-    let scaledWidth = stepRect.width / this.scale;
+    // Instead of edge-based positioning, use stepGap-based positioning
+    // similar to how the tree layout positions child steps
+
+    // Convert stepRect from screen coordinates to canvas coordinates
+    const canvasStepRect = {
+      left: stepRect.left - canvasRect.left,
+      top: stepRect.top - canvasRect.top,
+      width: stepRect.width,
+      height: stepRect.height
+    };
+
     if (this.options.options.orientation === 'VERTICAL') {
-      sides = [
-        [stepRect.left, stepRect.top + scaledHeight / 2], //left
-        [stepRect.left + scaledWidth * (1 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth * (2 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth * (3 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth * (4 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth, stepRect.top + scaledHeight / 2], //right
+      // For vertical orientation, position at the step's vertical center
+      return [
+        canvasStepRect.left + canvasStepRect.width / 2,
+        canvasStepRect.top + canvasStepRect.height / 2
       ];
-    } else if (this.options.options.orientation === 'HORIZONTAL') {
-      sides = [
-        [stepRect.left, stepRect.top + scaledHeight * (1 / 4)], //left
-        [stepRect.left, stepRect.top + scaledHeight * (3 / 4)], //left
-        [stepRect.left + scaledWidth * (1 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth * (2 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth * (3 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth * (4 / 5), stepRect.top], //top
-        [stepRect.left + scaledWidth * (1 / 5), stepRect.top + scaledHeight], //bottom
-        [stepRect.left + scaledWidth * (2 / 5), stepRect.top + scaledHeight], //bottom
-        [stepRect.left + scaledWidth * (3 / 5), stepRect.top + scaledHeight], //bottom
-        [stepRect.left + scaledWidth * (4 / 5), stepRect.top + scaledHeight], //bottom
+    } else {
+      // For horizontal orientation, position at the step's horizontal center
+      return [
+        canvasStepRect.left + canvasStepRect.width / 2,
+        canvasStepRect.top + canvasStepRect.height / 2
       ];
     }
-
-    const closest = sides.reduce(
-      (closest, current) => {
-        const absXDistance = Math.abs(startPos[0] - current[0]);
-        const absYDistance = Math.abs(startPos[1] - current[1]);
-        const distance = Math.sqrt(
-          absXDistance * absXDistance + absYDistance * absYDistance
-        );
-        if (!closest.pos || distance < closest.distance) {
-          return { pos: current, distance };
-        }
-        return closest;
-      },
-      { pos: null, distance: null }
-    );
-
-    return closest.pos;
   }
 
   public scaleCoordinate(pos: number[]): number[] {

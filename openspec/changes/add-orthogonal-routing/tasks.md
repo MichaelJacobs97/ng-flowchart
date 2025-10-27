@@ -6,6 +6,8 @@
 - [x] 2.1 Update `CanvasRendererService` to generate orthogonal connector coordinates with lane offsets.
 - [x] 2.2 Adjust `NgFlowchartConnectorComponent` to consume multi-segment paths and keep label placement stable.
 - [x] 2.3 Ensure serialization/import pipeline recalculates routes without storing bend data.
+- [x] 2.4 Fix coordinate system mismatch: connector component must use absolute canvas coordinates directly.
+- [x] 2.5 Update `findClosestEndEdge` to use stepGap-based positioning instead of edge-based calculations.
 
 ## 3. Validation
 - [x] 3.1 Add unit tests covering routing helper edge cases and lane offsets.
