@@ -9,6 +9,21 @@
       "glob": "**/*.scss",
       "input": "src/lib",
       "output": "lib"
+    },
+    {
+      "glob": "**/*.html",
+      "input": "src/lib",
+      "output": "src/lib"
+    },
+    {
+      "glob": "**/*.ts",
+      "input": "src/lib",
+      "output": "src/lib"
+    },
+    {
+      "glob": "public-api.ts",
+      "input": "src",
+      "output": "src"
     }
   ]
 }

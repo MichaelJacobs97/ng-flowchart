@@ -1,7 +1,10 @@
 :host {
-  position: relative;
-  z-index: 10;
+  position: absolute; /* host itself is positioned by TS (left/top) */
   display: block;
+  width: 14px;
+  height: 14px;
+  cursor: crosshair;
+  pointer-events: auto;
 
   &:not(.dragging) {
     transition: all 0.2s;
@@ -11,4 +14,9 @@
 .ngflowchart-connector-pad {
   position: absolute;
   cursor: crosshair;
+  pointer-events: auto; /* svg receives events */
+}
+
+.ngflowchart-connector-pad circle {
+  pointer-events: all; /* ensure circle captures pointer even if fill=none */
 }

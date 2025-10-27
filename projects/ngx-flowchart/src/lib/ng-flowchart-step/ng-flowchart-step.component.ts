@@ -21,6 +21,13 @@ import { NgFlowchartConnectorPadComponent } from '../ng-flowchart-connector-pad/
 import { DropDataService } from '../services/dropdata.service';
 import { NgTemplateOutlet } from '@angular/common';
 
+const DEFAULT_MANUAL_CONNECTOR_POSITIONS: NgFlowchart.DropPosition[] = [
+  'ABOVE',
+  'RIGHT',
+  'LEFT',
+  'BELOW',
+];
+
 export type AddChildOptions = {
   /** Should the child be added as a sibling to existing children, if false the existing children will be reparented to this new child.
    * Default is true.
@@ -30,6 +37,14 @@ export type AddChildOptions = {
    * Defaults to the end of the child array.
    */
   index?: number;
+};
+
+export type ManualConnectorDisplayMode = 'ALWAYS' | 'HOVER';
+
+type ManualConnectorHintEntry = {
+  element: HTMLElement;
+  mode: ManualConnectorDisplayMode;
+  source: 'default' | 'directive';
 };
 
 @Component({
@@ -111,6 +126,36 @@ export class NgFlowchartStepComponent<T = any>
   @Input()
   compRef: ComponentRef<NgFlowchartStepComponent>;
 
+  private defaultManualConnectorPositions = new Set<
+    NgFlowchart.DropPosition
+  >(DEFAULT_MANUAL_CONNECTOR_POSITIONS);
+  private manualConnectorOverrides = new Map<
+    string,
+    ManualConnectorDisplayMode
+  >();
+  private _manualConnectorDisplayMode: ManualConnectorDisplayMode = 'ALWAYS';
+
+  @Input()
+  set manualConnectorPositions(value: Array<NgFlowchart.DropPosition | string>) {
+    const parsed = this.normalizeConnectorPositions(value);
+    this.defaultManualConnectorPositions = new Set(parsed);
+    this.ensureManualConnectorHints();
+  }
+
+  get manualConnectorPositions(): NgFlowchart.DropPosition[] {
+    return Array.from(this.defaultManualConnectorPositions) as any;
+  }
+
+  @Input()
+  set manualConnectorDisplayMode(value: ManualConnectorDisplayMode) {
+    this._manualConnectorDisplayMode = value || 'ALWAYS';
+    this.ensureManualConnectorHints();
+  }
+
+  get manualConnectorDisplayMode(): ManualConnectorDisplayMode {
+    return this._manualConnectorDisplayMode;
+  }
+
   readonly viewInit = output();
 
   @Input()
@@ -126,6 +171,10 @@ export class NgFlowchartStepComponent<T = any>
   private _children: Array<NgFlowchartStepComponent>;
   private arrow: ComponentRef<NgFlowchartArrowComponent>;
   private connectorPad: ComponentRef<NgFlowchartConnectorPadComponent>;
+  private manualConnectorHints = new Map<
+    NgFlowchart.DropPosition,
+    ManualConnectorHintEntry
+  >();
 
   private drop: DropDataService;
   private viewContainer: ViewContainerRef;
@@ -201,6 +250,7 @@ export class NgFlowchartStepComponent<T = any>
     this.nativeElement.id = this.id;
 
     this.viewInit.emit();
+    this.ensureManualConnectorHints();
   }
 
   get id() {
@@ -236,6 +286,108 @@ export class NgFlowchartStepComponent<T = any>
     this.canvas.reRender();
 
     return componentRef.instance;
+  }
+
+  registerManualConnectorOverride(
+    positions: NgFlowchart.DropPosition[],
+    mode: ManualConnectorDisplayMode
+  ) {
+    positions.forEach(pos => this.manualConnectorOverrides.set(pos, mode));
+    this.ensureManualConnectorHints();
+  }
+
+  unregisterManualConnectorOverride(positions: NgFlowchart.DropPosition[]) {
+    positions.forEach(pos => this.manualConnectorOverrides.delete(pos));
+    this.ensureManualConnectorHints();
+  }
+
+  private normalizeConnectorPositions(
+    value: Array<NgFlowchart.DropPosition | string>
+  ): NgFlowchart.DropPosition[] {
+    if (!value?.length) {
+      return [...DEFAULT_MANUAL_CONNECTOR_POSITIONS];
+    }
+
+    return (Array.isArray(value) ? value : [value])
+      .join(',')
+      .split(/[,\s]+/)
+      .map(v => v.trim().toUpperCase())
+      .filter((v): v is NgFlowchart.DropPosition =>
+        ['ABOVE', 'BELOW', 'LEFT', 'RIGHT'].includes(v)
+      );
+  }
+
+  private ensureManualConnectorHints() {
+    if (!this.nativeElement) {
+      return;
+    }
+
+    const desired = new Map<NgFlowchart.DropPosition, ManualConnectorHintEntry>();
+
+    this.defaultManualConnectorPositions.forEach(pos => {
+      desired.set(pos as NgFlowchart.DropPosition, {
+        element: null as any,
+        mode: this.manualConnectorDisplayMode,
+        source: 'default',
+      });
+    });
+
+    this.manualConnectorOverrides.forEach((mode, pos) => {
+      desired.set(pos as NgFlowchart.DropPosition, {
+        element: null as any,
+        mode,
+        source: 'directive',
+      });
+    });
+
+    this.manualConnectorHints.forEach((entry, pos) => {
+      if (!desired.has(pos)) {
+        entry.element.remove();
+        this.manualConnectorHints.delete(pos);
+      }
+    });
+
+    desired.forEach((definition, pos) => {
+      this.createOrUpdateManualConnectorHint(pos, definition);
+    });
+  }
+
+  private createOrUpdateManualConnectorHint(
+    position: NgFlowchart.DropPosition,
+    entry: { mode: ManualConnectorDisplayMode; source: 'default' | 'directive' }
+  ) {
+    const existing = this.manualConnectorHints.get(position);
+    if (existing) {
+      existing.mode = entry.mode;
+      existing.source = entry.source;
+      this.applyHintVisibility(existing);
+      return;
+    }
+
+    const element = document.createElement('div');
+    element.classList.add('manual-connector-hint');
+    element.classList.add(`manual-connector-hint--${position.toLowerCase()}`);
+    element.dataset['source'] = entry.source;
+    this.nativeElement.appendChild(element);
+
+    const newEntry: ManualConnectorHintEntry = {
+      element,
+      mode: entry.mode,
+      source: entry.source,
+    };
+    this.manualConnectorHints.set(position, newEntry);
+    this.applyHintVisibility(newEntry);
+  }
+
+  private applyHintVisibility(entry: ManualConnectorHintEntry) {
+    if (!entry) {
+      return;
+    }
+    if (entry.mode === 'ALWAYS') {
+      entry.element.classList.add('manual-connector-hint--visible');
+    } else {
+      entry.element.classList.remove('manual-connector-hint--visible');
+    }
   }
 
   /**
@@ -716,8 +868,7 @@ export class NgFlowchartStepComponent<T = any>
 
     const hidePad =
       this.canvas.disabled ||
-      !this.isConnectorPadEnabled() ||
-      this.isRootElement();
+      !this.isConnectorPadEnabled();
     this.connectorPad.instance.hidden = hidePad;
   }
 
