@@ -623,4 +623,13 @@ export class NgFlowchartCanvasService {
     });
     step.parents.length = 0;
   }
+
+  /**
+   * Public API method to detach a step from the flow
+   * @param step The step component to detach
+   * @param recursive If true, detach the step and all descendants as a subtree. If false, detach only the specified step.
+   */
+  public detachStep(step: NgFlowchartStepComponent, recursive: boolean = false): void {
+    step.detachFromFlow(recursive);
+  }
 }

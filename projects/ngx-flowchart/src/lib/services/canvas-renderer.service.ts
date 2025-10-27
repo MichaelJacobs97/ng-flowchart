@@ -833,15 +833,15 @@ export class CanvasRendererService {
     };
 
     if (this.options.options.orientation === 'VERTICAL') {
-      // For vertical orientation, position at the step's vertical center
+      // For vertical orientation, position at the step's left edge and vertical center
       return [
-        canvasStepRect.left + canvasStepRect.width / 2,
+        canvasStepRect.left, // Attach to left side
         canvasStepRect.top + canvasStepRect.height / 2
       ];
     } else {
-      // For horizontal orientation, position at the step's horizontal center
+      // For horizontal orientation, position at the step's left edge and vertical center
       return [
-        canvasStepRect.left + canvasStepRect.width / 2,
+        canvasStepRect.left, // Attach to left side
         canvasStepRect.top + canvasStepRect.height / 2
       ];
     }

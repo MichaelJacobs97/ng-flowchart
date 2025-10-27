@@ -63,3 +63,18 @@ The canvas SHALL handle coordinate transformations correctly to ensure connector
 - **WHEN** the connector positions are calculated
 - **THEN** the positioning SHALL use predefined step distances (stepGap) similar to tree layout
 - **AND** connectors SHALL maintain consistent spacing regardless of manual or automatic creation
+
+### Requirement: Left-Side Connector Attachment
+The canvas SHALL position connectors to attach to the left side of child steps and approach from the left side.
+
+#### Scenario: Left-side attachment point
+- **GIVEN** a connector targets a child step
+- **WHEN** the end position is calculated
+- **THEN** the connector SHALL attach to the left edge of the target step
+- **AND** the arrow head SHALL point to the left side of the step
+
+#### Scenario: Left-side approach
+- **GIVEN** a connector approaches a child step from a parent step
+- **WHEN** the connector path is calculated
+- **THEN** the connector SHALL approach the target step from the left side
+- **AND** the final horizontal segment SHALL be parallel to the step's left edge

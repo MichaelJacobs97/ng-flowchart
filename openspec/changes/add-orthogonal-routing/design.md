@@ -10,6 +10,7 @@ The renderer currently draws connectors as single-line diagonals derived from st
   - Produce 90° connectors dynamically at render time using absolute canvas coordinates.
   - Ensure connector arrows reach target nodes by fixing coordinate system transformations.
   - Use predefined step distances (stepGap) for consistent spacing similar to tree layout.
+  - Position connectors to attach to the left side of child steps and approach from the left.
   - Keep serialization simple (no stored bend points).
   - Maintain label clarity and manual connector UX.
 - Non-Goals:
@@ -21,6 +22,8 @@ The renderer currently draws connectors as single-line diagonals derived from st
 - Use absolute canvas coordinates directly in connector component without container-relative transformation.
 - Fix coordinate system mismatch: `findClosestEndEdge` returns absolute canvas coordinates that should be used directly.
 - Use predefined step distances (stepGap) for connector positioning similar to tree layout instead of edge-based calculations.
+- Position connectors to attach to the left side of child steps for consistent visual alignment.
+- Approach connectors from the left side with final segments parallel to the target step's left edge.
 - Derive lane offsets from connector order per target to reduce overlap.
 - Keep labels anchored to the longest straight segment using existing padding logic.
 

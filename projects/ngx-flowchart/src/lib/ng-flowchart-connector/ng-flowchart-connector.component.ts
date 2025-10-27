@@ -321,26 +321,26 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     // Start from the actual start position
     segments.push(`M${start[0]} ${start[1]}`);
 
-    // Create orthogonal path based on orientation
+    // Create orthogonal path based on orientation, ensuring approach from left side
     if (this.canvas.options.options.orientation === 'VERTICAL') {
-      // For vertical orientation, prefer vertical segments first
-      if (Math.abs(start[0] - end[0]) > Math.abs(start[1] - end[1])) {
-        // Horizontal distance is greater, go horizontal first
+      // For vertical orientation, always approach target horizontally from left, then vertically
+      if (start[0] < end[0]) {
+        // Start is left of target - go right horizontally, then to target vertically
         segments.push(`L${end[0]} ${start[1]}`);
         segments.push(`L${end[0]} ${end[1]}`);
       } else {
-        // Vertical distance is greater, go vertical first
-        segments.push(`L${start[0]} ${end[1]}`);
+        // Start is right of target - go left horizontally, then to target vertically
+        segments.push(`L${end[0]} ${start[1]}`);
         segments.push(`L${end[0]} ${end[1]}`);
       }
     } else {
-      // For horizontal orientation, prefer horizontal segments first
-      if (Math.abs(start[1] - end[1]) > Math.abs(start[0] - end[0])) {
-        // Vertical distance is greater, go vertical first
-        segments.push(`L${start[0]} ${end[1]}`);
+      // For horizontal orientation, always approach target horizontally from left, then vertically
+      if (start[0] < end[0]) {
+        // Start is left of target - go right horizontally, then to target vertically
+        segments.push(`L${end[0]} ${start[1]}`);
         segments.push(`L${end[0]} ${end[1]}`);
       } else {
-        // Horizontal distance is greater, go horizontal first
+        // Start is right of target - go left horizontally, then to target vertically
         segments.push(`L${end[0]} ${start[1]}`);
         segments.push(`L${end[0]} ${end[1]}`);
       }

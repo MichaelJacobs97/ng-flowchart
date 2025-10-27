@@ -48,6 +48,13 @@ export class NgFlowchartStepComponent<T = any>
     if (this.canvas.disabled) {
       return;
     }
+    
+    // Prevent dragging if step is flow-connected (has parent or is root)
+    if (this.isFlowConnected()) {
+      event.preventDefault();
+      return;
+    }
+    
     //allow dragging steps in nested canvas
     event.stopPropagation();
 
@@ -194,6 +201,9 @@ export class NgFlowchartStepComponent<T = any>
       this.nativeElement.classList.add('horizontal');
     }
     this.nativeElement.setAttribute('draggable', 'true');
+    
+    // Update cursor based on flow-connected status
+    this.updateDragCursor();
 
     if (this._initPosition) {
       this.zsetPosition(this._initPosition);
@@ -307,6 +317,8 @@ export class NgFlowchartStepComponent<T = any>
     if (asPrimary || !this._primaryParent) {
       this._primaryParent = parent;
     }
+    // Update cursor when relationship changes
+    this.updateDragCursor();
   }
 
   /**
@@ -322,12 +334,16 @@ export class NgFlowchartStepComponent<T = any>
     if (this._primaryParent === parent) {
       this._primaryParent = this._parents.values().next().value ?? null;
     }
+    // Update cursor when relationship changes
+    this.updateDragCursor();
   }
 
   setParent(parent: NgFlowchartStepComponent | null, primary: boolean = false) {
     if (!parent) {
       this._parents.clear();
       this._primaryParent = null;
+      // Update cursor when relationship changes
+      this.updateDragCursor();
       return;
     }
     this.addParent(parent, primary);
@@ -357,6 +373,65 @@ export class NgFlowchartStepComponent<T = any>
    */
   isRootElement() {
     return this._parents.size === 0;
+  }
+
+  /**
+   * Check if this step is flow-connected (has parent or is root step)
+   * Flow-connected steps should not be draggable
+   */
+  isFlowConnected(): boolean {
+    return this.hasAnyParent() || this.canvas.flow.rootStep === this;
+  }
+
+  /**
+   * Check if this step has any parent
+   */
+  hasAnyParent(): boolean {
+    return this._parents.size > 0;
+  }
+
+  /**
+   * Update the cursor style based on whether the step is draggable
+   */
+  private updateDragCursor(): void {
+    if (this.isFlowConnected()) {
+      this.nativeElement.style.cursor = 'not-allowed';
+    } else {
+      this.nativeElement.style.cursor = 'grab';
+    }
+  }
+
+  /**
+   * Public API method to detach this step from the flow
+   * @param recursive If true, detach this step and all descendants as a subtree. If false, detach only this step.
+   */
+  detachFromFlow(recursive: boolean = false): void {
+    // Detach this step from its parents
+    this.parents.forEach(parent => {
+      parent.removeChild(this);
+      parent.destroyConnectors(this.id);
+    });
+    this._parents.clear();
+    
+    // Clear root reference if this is the root step
+    if (this.canvas.flow.rootStep === this) {
+      this.canvas.flow.rootStep = null;
+    }
+    
+    if (!recursive) {
+      // Non-recursive detachment: children become orphaned floating steps
+      // Remove this step as parent from all children
+      this.children.forEach(child => {
+        child.removeParent(this);
+      });
+    }
+    // Note: For recursive detachment, parent-child relationships within the subtree remain intact
+    
+    // Update cursor to indicate step is now draggable
+    this.updateDragCursor();
+    
+    // Trigger canvas re-render
+    this.canvas.reRender();
   }
 
   /**
