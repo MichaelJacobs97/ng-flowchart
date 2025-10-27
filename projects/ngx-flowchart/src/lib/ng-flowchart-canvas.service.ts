@@ -511,6 +511,8 @@ export class NgFlowchartCanvasService {
     parentStep: NgFlowchartStepComponent,
     childStep: NgFlowchartStepComponent
   ): boolean {
+    console.log('[NgFlowchart] attachStepToFlow called', { parentId: parentStep.id, childId: childStep.id });
+    
     // Avoid duplicate parent relationships
     if (
       parentStep === childStep ||
@@ -518,18 +520,22 @@ export class NgFlowchartCanvasService {
       childStep.parents.includes(parentStep) ||
       this.wouldCreateCycle(parentStep, childStep)
     ) {
+      console.log('[NgFlowchart] Cannot attach step - invalid relationship');
       return false;
     }
 
     // Record the new parent
     childStep.addParent(parentStep, childStep.isRootElement());
+    console.log('[NgFlowchart] Parent added, child now has', childStep.parents.length, 'parents');
 
     // Track in canvas step list if needed
     if (!this.flow.steps.includes(childStep)) {
       this.flow.addStep(childStep);
+      console.log('[NgFlowchart] Child step added to flow');
     }
 
     // Render so connectors/parents update immediately
+    console.log('[NgFlowchart] Calling render from attachStepToFlow');
     this.renderer.render(this.flow, true);
     return true;
   }
@@ -563,17 +569,22 @@ export class NgFlowchartCanvasService {
   }
 
   public linkConnector(startStepId: string, endStepId: string) {
+    console.log('[NgFlowchart] linkConnector called', { startStepId, endStepId });
+    
     if (!this.options.options.manualConnectors) {
+      console.log('[NgFlowchart] Manual connectors disabled');
       return;
     }
     const startStep = this.flow.steps.find(s => s.id === startStepId);
     const endStep = this.flow.steps.find(s => s.id === endStepId);
 
     if (!startStep || !endStep || startStep === endStep) {
+      console.log('[NgFlowchart] Invalid steps', { startStep: !!startStep, endStep: !!endStep, sameStep: startStep === endStep });
       return;
     }
 
     const adopted = this.attachStepToFlow(startStep, endStep);
+    console.log('[NgFlowchart] Step adopted into flow', { adopted });
 
     const isExistingConn = this.flow.connectors.some(
       c =>
@@ -583,18 +594,23 @@ export class NgFlowchartCanvasService {
     const stepAlreadyChild = startStep.children.find(c => c.id === endStepId);
 
     if (!isExistingConn && !stepAlreadyChild) {
+      console.log('[NgFlowchart] Creating new connector');
       var connector = { startStepId: startStepId, endStepId: endStepId };
       var connComponent = this.createConnector(connector);
       this.renderer.renderConnector(connComponent);
       this.flow.addConnector(connComponent.instance);
 
+      console.log('[NgFlowchart] Calling render (no pretty)');
       this.renderer.render(this.flow);
 
       this.options.callbacks.onLinkConnector &&
         this.options.callbacks.onLinkConnector(connector);
+    } else {
+      console.log('[NgFlowchart] Connector already exists or step already child', { isExistingConn, stepAlreadyChild: !!stepAlreadyChild });
     }
 
     if (adopted) {
+      console.log('[NgFlowchart] Calling render with prettyRender=true');
       this.renderer.render(this.flow, true);
     }
   }

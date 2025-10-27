@@ -111,17 +111,27 @@ export class CanvasRendererService {
     //add length for stepGaps between child trees
     totalTreeWidth += (rootNode.children.length - 1) * this.getStepGap();
 
-    //if we have more than 1 child, we want half the extent on the left and half on the right
-    let leftXTree = rootXCenter - totalTreeWidth / 2;
+    // Lane-based positioning: first child in same column as parent, subsequent children in new columns
+    // First child: start at parent's X center
+    // Subsequent children: positioned to the right with stepGap spacing
+    let leftXTree = rootXCenter;
 
     // dont allow it to go negative since you cant scroll that way
     leftXTree = Math.max(0, leftXTree);
 
-    rootNode.children.forEach(child => {
+    rootNode.children.forEach((child, index) => {
       let childExtent = childTreeWidths[child.nativeElement.id];
 
-      let childLeft =
-        leftXTree + childExtent / 2 - child.nativeElement.offsetWidth / 2;
+      let childLeft;
+      if (index === 0) {
+        // First child: align center with parent's center
+        childLeft = leftXTree - child.nativeElement.offsetWidth / 2;
+        // Move leftXTree to position to the right of first child for next children
+        leftXTree += childExtent / 2 + this.getStepGap();
+      } else {
+        // Subsequent children: position center at leftXTree
+        childLeft = leftXTree - child.nativeElement.offsetWidth / 2;
+      }
 
       child.zsetPosition([childLeft, childYTop]);
 
@@ -138,7 +148,10 @@ export class CanvasRendererService {
       );
 
       this.renderVerticalChildTree(child, currentChildRect, canvasRect);
-      leftXTree += childExtent + this.getStepGap();
+      // Increment leftXTree for subsequent children (first child already incremented)
+      if (index > 0) {
+        leftXTree += childExtent + this.getStepGap();
+      }
     });
   }
 
@@ -153,6 +166,8 @@ export class CanvasRendererService {
       return;
     }
 
+    console.log('[CanvasRenderer] renderHorizontalChildTree - rendering', rootNode.children.length, 'children');
+
     const rootRight =
       rootRect.left - canvasRect.left + rootRect.width / this.scale;
     //top of the child row is simply the relative Right of the root + stepGap
@@ -161,6 +176,7 @@ export class CanvasRendererService {
     const rootHeight = rootRect.height / this.scale;
 
     const rootYCenter = rootRect.top - canvasRect.top + rootHeight / 2;
+    console.log('[CanvasRenderer] Root Y center:', rootYCenter);
 
     //get the width of the child trees
     let childTreeHeights = {};
@@ -179,17 +195,29 @@ export class CanvasRendererService {
     //add length for stepGaps between child trees
     totalTreeHeight += (rootNode.children.length - 1) * this.getStepGap();
 
-    //if we have more than 1 child, we want half the extent on the left and half on the right
-    let topYTree = rootYCenter - totalTreeHeight / 2;
+    // Lane-based positioning: first child in same lane as parent, subsequent children in new lanes
+    // First child: start at parent's Y center
+    // Subsequent children: positioned below with stepGap spacing
+    let topYTree = rootYCenter;
 
     // dont allow it to go negative since you cant scroll that way
     topYTree = Math.max(0, topYTree);
 
-    rootNode.children.forEach(child => {
+    rootNode.children.forEach((child, index) => {
       let childExtent = childTreeHeights[child.nativeElement.id];
 
-      let childTop =
-        topYTree + childExtent / 2 - child.nativeElement.offsetHeight / 2;
+      let childTop;
+      if (index === 0) {
+        // First child: align center with parent's center
+        childTop = topYTree - child.nativeElement.offsetHeight / 2;
+        console.log('[CanvasRenderer] First child position:', { childTop, topYTree, childHeight: child.nativeElement.offsetHeight });
+        // Move topYTree to position below first child for next children
+        topYTree += childExtent / 2 + this.getStepGap();
+      } else {
+        // Subsequent children: position center at topYTree
+        childTop = topYTree - child.nativeElement.offsetHeight / 2;
+        console.log('[CanvasRenderer] Child', index, 'position:', { childTop, topYTree, childHeight: child.nativeElement.offsetHeight });
+      }
 
       child.zsetPosition([childXLeft, childTop]);
 
@@ -206,7 +234,10 @@ export class CanvasRendererService {
       );
 
       this.renderHorizontalChildTree(child, currentChildRect, canvasRect);
-      topYTree += childExtent + this.getStepGap();
+      // Increment topYTree for subsequent children (first child already incremented)
+      if (index > 0) {
+        topYTree += childExtent + this.getStepGap();
+      }
     });
   }
 
@@ -215,7 +246,10 @@ export class CanvasRendererService {
     pretty?: boolean,
     skipAdjustDimensions?: boolean
   ) {
+    console.log('[CanvasRenderer] render called', { pretty, skipAdjustDimensions, hasRoot: flow.hasRoot(), orientation: this.options.options.orientation });
+    
     if (!flow.hasRoot()) {
+      console.log('[CanvasRenderer] No root step found');
       if (this.options.options.zoom.mode === 'DISABLED') {
         this.resetAdjustDimensions();
         // Trigger afterRender to allow nested canvas to redraw parent canvas.
@@ -233,10 +267,12 @@ export class CanvasRendererService {
 
     const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
     if (pretty) {
+      console.log('[CanvasRenderer] Pretty render enabled - repositioning root');
       //this will place the root at the top center of the canvas and render from there
       this.setRootPosition(flow.rootStep, null);
     }
 
+    console.log('[CanvasRenderer] Rendering child tree, root has', flow.rootStep.children.length, 'children');
     if (this.options.options.orientation === 'VERTICAL') {
       this.renderVerticalChildTree(
         flow.rootStep,
