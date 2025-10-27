@@ -511,23 +511,20 @@ export class NgFlowchartCanvasService {
     parentStep: NgFlowchartStepComponent,
     childStep: NgFlowchartStepComponent
   ): boolean {
-    // If already a direct child, nothing to do
-    if (parentStep.children.includes(childStep)) {
-      return true;
+    // Avoid duplicate parent relationships
+    if (parentStep.hasParent(childStep) || childStep.parents.includes(parentStep)) {
+      return false;
     }
 
-    // Detach from any previous parent
-    this.detachFromParent(childStep);
+    // Record the new parent
+    childStep.addParent(parentStep, childStep.isRootElement());
 
-    // Append as a sibling child of the parent (do NOT reparent existing children)
-    parentStep.zaddChildSibling0(childStep);
-
-    // Ensure the step is tracked in the canvas flow
+    // Track in canvas step list if needed
     if (!this.flow.steps.includes(childStep)) {
       this.flow.addStep(childStep);
     }
 
-    // Render with pretty reflow so connectors/parents update immediately
+    // Render so connectors/parents update immediately
     this.renderer.render(this.flow, true);
     return true;
   }
@@ -543,9 +540,7 @@ export class NgFlowchartCanvasService {
       return;
     }
 
-    if (this.attachStepToFlow(startStep, endStep)) {
-      return;
-    }
+    const adopted = this.attachStepToFlow(startStep, endStep);
 
     const isExistingConn = this.flow.connectors.some(
       c =>
@@ -564,6 +559,10 @@ export class NgFlowchartCanvasService {
 
       this.options.callbacks.onLinkConnector &&
         this.options.callbacks.onLinkConnector(connector);
+    }
+
+    if (adopted) {
+      this.renderer.render(this.flow, true);
     }
   }
 
@@ -584,13 +583,11 @@ export class NgFlowchartCanvasService {
   }
 
   private detachFromParent(step: NgFlowchartStepComponent) {
-    if (!step.parent) {
-      return;
-    }
-
-    const parent = step.parent;
-    parent.removeChild(step);
-    step.setParent(null, true);
-    parent.destroyConnectors(step.id);
+    // Remove step from all parents
+    step.parents.forEach(parent => {
+      parent.removeChild(step);
+      parent.destroyConnectors(step.id);
+    });
+    step.parents.length = 0;
   }
 }

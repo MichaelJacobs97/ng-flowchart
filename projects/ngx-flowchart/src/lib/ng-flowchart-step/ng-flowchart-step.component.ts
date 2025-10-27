@@ -21,13 +21,6 @@ import { NgFlowchartConnectorPadComponent } from '../ng-flowchart-connector-pad/
 import { DropDataService } from '../services/dropdata.service';
 import { NgTemplateOutlet } from '@angular/common';
 
-const DEFAULT_MANUAL_CONNECTOR_POSITIONS: NgFlowchart.DropPosition[] = [
-  'ABOVE',
-  'RIGHT',
-  'LEFT',
-  'BELOW',
-];
-
 export type AddChildOptions = {
   /** Should the child be added as a sibling to existing children, if false the existing children will be reparented to this new child.
    * Default is true.
@@ -37,14 +30,6 @@ export type AddChildOptions = {
    * Defaults to the end of the child array.
    */
   index?: number;
-};
-
-export type ManualConnectorDisplayMode = 'ALWAYS' | 'HOVER';
-
-type ManualConnectorHintEntry = {
-  element: HTMLElement;
-  mode: ManualConnectorDisplayMode;
-  source: 'default' | 'directive';
 };
 
 @Component({
@@ -57,6 +42,7 @@ type ManualConnectorHintEntry = {
 export class NgFlowchartStepComponent<T = any>
   implements OnInit, AfterViewInit
 {
+  // A step can now have multiple parents to support DAG structures
   @HostListener('dragstart', ['$event'])
   onMoveStart(event: DragEvent) {
     if (this.canvas.disabled) {
@@ -126,36 +112,6 @@ export class NgFlowchartStepComponent<T = any>
   @Input()
   compRef: ComponentRef<NgFlowchartStepComponent>;
 
-  private defaultManualConnectorPositions = new Set<
-    NgFlowchart.DropPosition
-  >(DEFAULT_MANUAL_CONNECTOR_POSITIONS);
-  private manualConnectorOverrides = new Map<
-    string,
-    ManualConnectorDisplayMode
-  >();
-  private _manualConnectorDisplayMode: ManualConnectorDisplayMode = 'ALWAYS';
-
-  @Input()
-  set manualConnectorPositions(value: Array<NgFlowchart.DropPosition | string>) {
-    const parsed = this.normalizeConnectorPositions(value);
-    this.defaultManualConnectorPositions = new Set(parsed);
-    this.ensureManualConnectorHints();
-  }
-
-  get manualConnectorPositions(): NgFlowchart.DropPosition[] {
-    return Array.from(this.defaultManualConnectorPositions) as any;
-  }
-
-  @Input()
-  set manualConnectorDisplayMode(value: ManualConnectorDisplayMode) {
-    this._manualConnectorDisplayMode = value || 'ALWAYS';
-    this.ensureManualConnectorHints();
-  }
-
-  get manualConnectorDisplayMode(): ManualConnectorDisplayMode {
-    return this._manualConnectorDisplayMode;
-  }
-
   readonly viewInit = output();
 
   @Input()
@@ -167,14 +123,11 @@ export class NgFlowchartStepComponent<T = any>
   //only used if something tries to set the position before view has been initialized
   private _initPosition;
   private _isHidden = false;
-  private _parent: NgFlowchartStepComponent;
+  private _parents: Set<NgFlowchartStepComponent> = new Set();
+  private _primaryParent: NgFlowchartStepComponent | null = null;
   private _children: Array<NgFlowchartStepComponent>;
   private arrow: ComponentRef<NgFlowchartArrowComponent>;
   private connectorPad: ComponentRef<NgFlowchartConnectorPadComponent>;
-  private manualConnectorHints = new Map<
-    NgFlowchart.DropPosition,
-    ManualConnectorHintEntry
-  >();
 
   private drop: DropDataService;
   private viewContainer: ViewContainerRef;
@@ -250,7 +203,6 @@ export class NgFlowchartStepComponent<T = any>
     this.nativeElement.id = this.id;
 
     this.viewInit.emit();
-    this.ensureManualConnectorHints();
   }
 
   get id() {
@@ -288,108 +240,6 @@ export class NgFlowchartStepComponent<T = any>
     return componentRef.instance;
   }
 
-  registerManualConnectorOverride(
-    positions: NgFlowchart.DropPosition[],
-    mode: ManualConnectorDisplayMode
-  ) {
-    positions.forEach(pos => this.manualConnectorOverrides.set(pos, mode));
-    this.ensureManualConnectorHints();
-  }
-
-  unregisterManualConnectorOverride(positions: NgFlowchart.DropPosition[]) {
-    positions.forEach(pos => this.manualConnectorOverrides.delete(pos));
-    this.ensureManualConnectorHints();
-  }
-
-  private normalizeConnectorPositions(
-    value: Array<NgFlowchart.DropPosition | string>
-  ): NgFlowchart.DropPosition[] {
-    if (!value?.length) {
-      return [...DEFAULT_MANUAL_CONNECTOR_POSITIONS];
-    }
-
-    return (Array.isArray(value) ? value : [value])
-      .join(',')
-      .split(/[,\s]+/)
-      .map(v => v.trim().toUpperCase())
-      .filter((v): v is NgFlowchart.DropPosition =>
-        ['ABOVE', 'BELOW', 'LEFT', 'RIGHT'].includes(v)
-      );
-  }
-
-  private ensureManualConnectorHints() {
-    if (!this.nativeElement) {
-      return;
-    }
-
-    const desired = new Map<NgFlowchart.DropPosition, ManualConnectorHintEntry>();
-
-    this.defaultManualConnectorPositions.forEach(pos => {
-      desired.set(pos as NgFlowchart.DropPosition, {
-        element: null as any,
-        mode: this.manualConnectorDisplayMode,
-        source: 'default',
-      });
-    });
-
-    this.manualConnectorOverrides.forEach((mode, pos) => {
-      desired.set(pos as NgFlowchart.DropPosition, {
-        element: null as any,
-        mode,
-        source: 'directive',
-      });
-    });
-
-    this.manualConnectorHints.forEach((entry, pos) => {
-      if (!desired.has(pos)) {
-        entry.element.remove();
-        this.manualConnectorHints.delete(pos);
-      }
-    });
-
-    desired.forEach((definition, pos) => {
-      this.createOrUpdateManualConnectorHint(pos, definition);
-    });
-  }
-
-  private createOrUpdateManualConnectorHint(
-    position: NgFlowchart.DropPosition,
-    entry: { mode: ManualConnectorDisplayMode; source: 'default' | 'directive' }
-  ) {
-    const existing = this.manualConnectorHints.get(position);
-    if (existing) {
-      existing.mode = entry.mode;
-      existing.source = entry.source;
-      this.applyHintVisibility(existing);
-      return;
-    }
-
-    const element = document.createElement('div');
-    element.classList.add('manual-connector-hint');
-    element.classList.add(`manual-connector-hint--${position.toLowerCase()}`);
-    element.dataset['source'] = entry.source;
-    this.nativeElement.appendChild(element);
-
-    const newEntry: ManualConnectorHintEntry = {
-      element,
-      mode: entry.mode,
-      source: entry.source,
-    };
-    this.manualConnectorHints.set(position, newEntry);
-    this.applyHintVisibility(newEntry);
-  }
-
-  private applyHintVisibility(entry: ManualConnectorHintEntry) {
-    if (!entry) {
-      return;
-    }
-    if (entry.mode === 'ALWAYS') {
-      entry.element.classList.add('manual-connector-hint--visible');
-    } else {
-      entry.element.classList.remove('manual-connector-hint--visible');
-    }
-  }
-
   /**
    * Destroys this step component and updates all necessary child and parent relationships
    * @param recursive
@@ -400,12 +250,7 @@ export class NgFlowchartStepComponent<T = any>
       this.canvas.options.callbacks.beforeDeleteStep &&
         this.canvas.options.callbacks.beforeDeleteStep(this);
 
-      let parentIndex;
-      if (this._parent) {
-        parentIndex = this._parent.removeChild(this);
-      }
-
-      this.destroy0(parentIndex, recursive);
+      this.destroy0(recursive);
 
       this.canvas.reRender();
 
@@ -445,6 +290,7 @@ export class NgFlowchartStepComponent<T = any>
       this.children.splice(i, 1);
     }
 
+    childToRemove.removeParent(this);
     return i;
   }
 
@@ -453,18 +299,38 @@ export class NgFlowchartStepComponent<T = any>
    * @param newParent The new parent for this step
    * @param force Force the re-parent if a parent already exists
    */
-  setParent(newParent: NgFlowchartStepComponent, force: boolean = false): void {
-    if (this.parent && !force) {
-      console.warn(
-        'This child already has a parent, use force if you know what you are doing'
-      );
+  addParent(parent: NgFlowchartStepComponent, asPrimary: boolean = false) {
+    if (!parent) {
       return;
     }
-    this._parent = newParent;
-    if (!this._parent && this.arrow) {
-      this.arrow.destroy();
-      this.arrow = null;
+    this._parents.add(parent);
+    if (asPrimary || !this._primaryParent) {
+      this._primaryParent = parent;
     }
+  }
+
+  /**
+   * Re-parent this step
+   * @param newParent The new parent for this step
+   * @param force Force the re-parent if a parent already exists
+   */
+  removeParent(parent: NgFlowchartStepComponent) {
+    if (!parent) {
+      return;
+    }
+    this._parents.delete(parent);
+    if (this._primaryParent === parent) {
+      this._primaryParent = this._parents.values().next().value ?? null;
+    }
+  }
+
+  setParent(parent: NgFlowchartStepComponent | null, primary: boolean = false) {
+    if (!parent) {
+      this._parents.clear();
+      this._primaryParent = null;
+      return;
+    }
+    this.addParent(parent, primary);
   }
 
   /**
@@ -490,7 +356,7 @@ export class NgFlowchartStepComponent<T = any>
    * Is this the root element of the tree
    */
   isRootElement() {
-    return !this.parent;
+    return this._parents.size === 0;
   }
 
   /**
@@ -511,8 +377,16 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   /** The parent step of this step */
-  get parent() {
-    return this._parent;
+  get parents(): NgFlowchartStepComponent[] {
+    return Array.from(this._parents);
+  }
+
+  get parent(): NgFlowchartStepComponent | null {
+    return this._primaryParent;
+  }
+
+  hasParent(parent: NgFlowchartStepComponent): boolean {
+    return this._parents.has(parent);
   }
 
   /**
@@ -631,31 +505,10 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   zaddChild0(newChild: NgFlowchartStepComponent): boolean {
-    let oldChildIndex = null;
-    if (newChild._parent) {
-      oldChildIndex = newChild._parent.removeChild(newChild);
+    if (!this._children.includes(newChild)) {
+      this._children = [newChild];
     }
-
-    if (this.hasChildren()) {
-      if (newChild.hasChildren()) {
-        //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
-        let newChildLastChild = newChild.findLastSingleChild();
-        if (!newChildLastChild) {
-          if (newChild._parent) {
-            newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
-          }
-          console.error('Invalid move. A node cannot have multiple parents');
-          return false;
-        }
-        //move the this nodes children to last child of the step arg
-        newChildLastChild.setChildren(this._children.slice());
-      } else {
-        //move adjacent's children to newStep
-        newChild.setChildren(this._children.slice());
-      }
-    }
-    //finally reset this nodes children to the single new child
-    this.setChildren([newChild]);
+    newChild.addParent(this, true);
     return true;
   }
 
@@ -663,49 +516,18 @@ export class NgFlowchartStepComponent<T = any>
     newChild: NgFlowchartStepComponent,
     newParent: NgFlowchartStepComponent
   ): boolean {
-    let oldChildIndex = null;
-    if (newChild._parent) {
-      oldChildIndex = newChild._parent.removeChild(newChild);
-    }
-
-    let finalChild = this;
-    if (this.hasChildren()) {
-      //if we have children we need to confirm the child doesnt have multiple children at any point
-      const newChildLastChild = this.findLastSingleChild();
-      if (!newChildLastChild) {
-        if (newChild._parent) {
-          newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
-        }
-        console.error('Invalid move. A node cannot have multiple parents');
-        return false;
-      } else {
-        finalChild = newChildLastChild;
-      }
-    }
-    //finally reset this nodes children to the single new child
-    finalChild.setChildren([newChild]);
-    if (newParent) {
-      newParent.zaddChildSibling0(this, oldChildIndex);
-    }
+    this._children = [newChild];
+    newChild.addParent(this, true);
     return true;
   }
 
   zaddChildSibling0(child: NgFlowchartStepComponent, index?: number): void {
-    if (child._parent) {
-      child._parent.removeChild(child);
-    }
-
-    if (!this.children) {
+    if (!this._children) {
       this._children = [];
     }
-    if (index == null) {
-      this.children.push(child);
-    } else {
-      this.children.splice(index, 0, child);
-    }
-
-    //since we are adding a new child here, it is safe to force set the parent
-    child.setParent(this, true);
+    const targetIndex = index == null ? this._children.length : index;
+    this._children.splice(targetIndex, 0, child);
+    child.setParent(this, index == null && this._children.length === 1);
   }
 
   zdrawArrow(start: number[], end: number[]) {
@@ -721,7 +543,7 @@ export class NgFlowchartStepComponent<T = any>
   ////////////////////////
   // PRIVATE IMPL
 
-  private destroy0(parentIndex, recursive: boolean = true) {
+  private destroy0(recursive: boolean = true) {
     this.compRef.destroy();
 
     // remove from master array
@@ -741,42 +563,18 @@ export class NgFlowchartStepComponent<T = any>
     }
 
     if (this.hasChildren()) {
-      //this was the root node
-      if (this.isRootElement()) {
-        if (!recursive) {
-          let newRoot = this._children[0];
-          //set first child as new root
-          this.canvas.flow.rootStep = newRoot;
-          newRoot.setParent(null, true);
-
-          //make previous siblings children of the new root
-          if (this.hasChildren(2)) {
-            for (let i = 1; i < this._children.length; i++) {
-              let child = this._children[i];
-              child.setParent(newRoot, true);
-              newRoot._children.push(child);
-            }
-          }
-        }
-      }
-
-      //update children
       let length = this._children.length;
       for (let i = 0; i < length; i++) {
         let child = this._children[i];
         if (recursive) {
-          (child as NgFlowchartStepComponent).destroy0(null, true);
-        }
-
-        //not the original root node
-        else if (!!this._parent) {
-          this._parent._children.splice(i + parentIndex, 0, child);
-          child.setParent(this._parent, true);
+          (child as NgFlowchartStepComponent).destroy0(true);
+        } else {
+          child.removeParent(this);
         }
       }
-      this.setChildren([]);
+      this._children = [];
     }
-    this._parent = null;
+    this._parents.clear();
   }
 
   private createArrow() {
