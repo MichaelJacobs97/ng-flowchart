@@ -215,14 +215,18 @@ export namespace NgFlowchart {
     afterDeleteConnector?: (connector: NgFlowchartConnectorComponent) => void;
   };
 
+  export type ConnectorLabelData = {
+    text?: string;
+    color?: string;
+    background?: string;
+    payload?: any;
+  };
+
   export type Connector = {
     startStepId: string;
     endStepId: string;
-    label?: string;           // NEW: Visual label text ("3 days", "5 check-ins")
-    labelData?: {             // NEW: Structured metadata
-      type?: 'days' | 'check-ins';
-      value?: number;
-    };
+    label?: string;
+    labelData?: ConnectorLabelData;
   };
 
   export enum DropType {

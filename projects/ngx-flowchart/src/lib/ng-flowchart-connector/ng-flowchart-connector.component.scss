@@ -64,6 +64,10 @@
 }
 
 // NEW: Connector label styling
+.connector-label {
+  pointer-events: none;
+}
+
 .connector-label-text {
   font-size: 12px;
   fill: #333;

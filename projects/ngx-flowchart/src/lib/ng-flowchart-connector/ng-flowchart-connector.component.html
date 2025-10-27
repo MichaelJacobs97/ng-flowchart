@@ -84,16 +84,15 @@
       stroke="transparent"
       stroke-dasharray="none" />
   </g>
-  <!-- NEW: Render label at midpoint -->
-  @if (connector?.label) {
+  @if (labelText) {
     <g class="connector-label">
       <text
         [attr.x]="labelX"
         [attr.y]="labelY"
         text-anchor="middle"
-        dy="-5"
+        dy="-6"
         class="connector-label-text">
-        {{ connector.label }}
+        {{ labelText }}
       </text>
     </g>
   }

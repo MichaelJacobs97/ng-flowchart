@@ -55,7 +55,7 @@ paletteStep: NgFlowchart.PendingStep = {
 ## Features
 
 - **Free-floating drops**: palette steps can be placed anywhere and later attached.
-- **Manual connectors**: link any two steps with interactive connector pads.
+- **Manual connectors**: link any two steps with interactive connector pads and optional labels.
 - **Source shipping**: TypeScript/HTML files are included in the npm package.
 - **Upload/download API**: serialize flows via `NgFlowchart.Flow` helpers.
 - **Standalone-friendly**: directives/services ready for Angular standalone usage.
